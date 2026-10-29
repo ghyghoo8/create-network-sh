@@ -1,0 +1,8 @@
+# Local credentials and Finder/runtime metadata must stay out of shared material.
+.DS_Store
+__MACOSX/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]

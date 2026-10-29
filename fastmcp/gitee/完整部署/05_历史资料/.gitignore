@@ -1,0 +1,11 @@
+# Local Git protection only; this has no effect on Library/cloud sharing.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+credentials/
+*.log
+/.token
+/token

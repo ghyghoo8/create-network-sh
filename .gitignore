@@ -1,0 +1,28 @@
+# Local secrets; keep empty credential examples shareable.
+.env
+.env.*
+!.env.example
+cookie-secret
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Runtime state can contain credentials, node identities or sessions.
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+logs/
+run/
+
+# Local OS and Python metadata.
+.DS_Store
+__MACOSX/
+__pycache__/
+*.py[cod]

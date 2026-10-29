@@ -1,0 +1,11 @@
+# Actual VPS configuration copied back for local use is private.
+/config.env
+/config.yaml
+/policy.hujson
+
+# Downloaded application/runtime files are rebuilt from pinned sources.
+/app/
+/runtime/
+/.headplane-stage-*/
+/node-v*.tar.*
+/headplane-*.tar.*

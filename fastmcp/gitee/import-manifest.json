@@ -1,0 +1,141 @@
+{
+  "format": "repository-import-manifest-v1",
+  "source_archive": {
+    "filename": "gitee_20261020.zip",
+    "bytes": 121298,
+    "sha256": "9fa9ba5009b8ff223a9c9acebe8ace01b4ed56707b04b82219fc92f32d01b062"
+  },
+  "files": [
+    {
+      "archive_path": "gitee/完整部署/00_归档索引.md",
+      "path": "完整部署/00_归档索引.md",
+      "bytes": 4625,
+      "sha256": "199247156f790b676e21233b08cfc8cef1e5516377b0dad326cb8b59d59863f3",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/01_代码与脚本/.env.example",
+      "path": "完整部署/01_代码与脚本/.env.example",
+      "bytes": 76,
+      "sha256": "be1593c3642a908ae99409303617d081adf750f6dcb6dd4044f8760c1435898f",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/01_代码与脚本/auth_policy.py",
+      "path": "完整部署/01_代码与脚本/auth_policy.py",
+      "bytes": 683,
+      "sha256": "ef3669604d0cc54eb2d6357a015ad28a9a9e7062388b4321b251194def2adbe0",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/01_代码与脚本/gateway_server.py",
+      "path": "完整部署/01_代码与脚本/gateway_server.py",
+      "bytes": 13750,
+      "sha256": "e3ab24ec0bf6d43f9ffabae80d0608eb4f965d511a1a9e9158e5112a4500f9f8",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/01_代码与脚本/gitee_repository_tools.py",
+      "path": "完整部署/01_代码与脚本/gitee_repository_tools.py",
+      "bytes": 23591,
+      "sha256": "c70d4a77020f0b9efc61f2d7471d05ab18c80afc832651d27ba3d7ba683a2a14",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/01_代码与脚本/start.sh",
+      "path": "完整部署/01_代码与脚本/start.sh",
+      "bytes": 11574,
+      "sha256": "83e39ac9955f1025494fdaa320df6e1be1b2b3bf03ae660bfa3eae434bcedb4c",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/01_代码与脚本/stop.sh",
+      "path": "完整部署/01_代码与脚本/stop.sh",
+      "bytes": 5701,
+      "sha256": "0ff93c1655e420f6a536d2c17dcc8af87cc744107dd4b93b38a8ea35ba609eac",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/02_部署文档/服务启停说明.md",
+      "path": "完整部署/02_部署文档/服务启停说明.md",
+      "bytes": 3793,
+      "sha256": "5ab9d0c1571805411ddfdc2cf68f874fec7e72609a7ba7fb454fde55898f7af9",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/02_部署文档/部署指南.md",
+      "path": "完整部署/02_部署文档/部署指南.md",
+      "bytes": 20833,
+      "sha256": "c23e4924f537bdac9663c7798f1acc25f5d90b79b08f46f091811fa39f626d0d",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/03_诊断与验收/diagnose_gateway.py",
+      "path": "完整部署/03_诊断与验收/diagnose_gateway.py",
+      "bytes": 5953,
+      "sha256": "2dbd55c55e4a71b0a613b494cacb5384a3dfb7a78ea56bffbaebae174b7d052c",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/03_诊断与验收/migration_manifest.py",
+      "path": "完整部署/03_诊断与验收/migration_manifest.py",
+      "bytes": 3305,
+      "sha256": "6fc95f76633fa99416162a785f980ac7d084fa5dfc598b4ac444b77b90707b71",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/03_诊断与验收/test_gateway_tools.py",
+      "path": "完整部署/03_诊断与验收/test_gateway_tools.py",
+      "bytes": 27848,
+      "sha256": "c61a3f4e7111bc6b5874ae01829b5675b3212d61c918bbceb60c51769ac07a15",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/05_历史资料/.env.example",
+      "path": "完整部署/05_历史资料/.env.example",
+      "bytes": 354,
+      "sha256": "f4ad86882fac8e1c0deccab7b364021abfd097c3e57f766a82d0d37b9311b65c",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/05_历史资料/.gitignore",
+      "path": "完整部署/05_历史资料/.gitignore",
+      "bytes": 155,
+      "sha256": "50d7f0d28a031a3a0f7972b9d367e3a465779be7d73a7cdd076024d72859d38c",
+      "mode": "0644"
+    },
+    {
+      "archive_path": "gitee/完整部署/05_历史资料/test_gateway.py",
+      "path": "完整部署/05_历史资料/test_gateway.py",
+      "bytes": 3924,
+      "sha256": "5ab610ac9bad47d9d01fa321f04fa521f56c2637565fb3de953070dbfcb8efdb",
+      "mode": "0644"
+    }
+  ],
+  "excluded": [
+    {
+      "archive_path": "gitee/.token",
+      "reason": "Credential file; not extracted or committed."
+    }
+  ],
+  "content_state": "sanitized-local-copy",
+  "local_cleanup": {
+    "date": "2026-10-29",
+    "note": "files records current sanitized bytes, SHA-256 and permissions of remaining imported files; source_archive retains historical source metadata only. No online service was changed.",
+    "github_login_placeholder": "your-github-login",
+    "service_hostname_placeholder": "mcp.example.com",
+    "original_import_file_count": 18,
+    "remaining_import_file_count": 15,
+    "removed_import_paths": [
+      "完整部署/04_交付包/gitee_gateway_complete_20261009.zip",
+      "完整部署/04_交付包/gitee_gateway_tools_upgrade.zip",
+      "完整部署/04_交付包/gitee_service_scripts.zip"
+    ],
+    "removed_local_metadata": [
+      "fastmcp/.DS_Store",
+      "fastmcp/gitee/.DS_Store"
+    ],
+    "private_conversation_reference_removed": true,
+    "backups_created": false
+  }
+}
