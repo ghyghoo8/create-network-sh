@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-更新：2026-11-02，Asia/Shanghai。目标仓运行代码固定为 `a06dc70e7994df7cb3c92a30cfde4276c26a5759`，初始独立来源为 `7d162860c10ac2d72719522be7fe01478f4747a3`；Mac 适配实现初始固定提交为 `10c2030d6be54c617b53d6ae86a38335975f1b3a`，VPS 运行代码未因本地适配改动。除特别标明，以下现场证据由主执行侧直接取得。
+更新：2026-11-02，Asia/Shanghai。目标仓运行代码固定为 `a06dc70e7994df7cb3c92a30cfde4276c26a5759`，初始独立来源为 `7d162860c10ac2d72719522be7fe01478f4747a3`；Mac 初始实现为 `10c2030d6be54c617b53d6ae86a38335975f1b3a`，当前安装固定为 `7445b7fb937fd8dc5a6b243a97e386e7623f6534`，源码摘要回读一致；VPS 运行代码未因本地适配改动。除特别标明，以下现场证据由主执行侧直接取得。
 
 | 层次 | 状态 | 已有证据与范围 |
 | --- | --- | --- |
@@ -24,7 +24,7 @@
 | Mac Codex OAuth | FAIL | CLI 0.166.0-alpha.5.1 本地 callback 后 token exchange 报 Request failed；原因仍未定位，未自动重登或改变认证方式 |
 | Mac Kimi 配置 | PASS | 委托执行侧原子写入 Kimi Code 2.4.1 用户级 MCP 文件、保留既有条目；主执行侧另行直接回读端点匹配与权限 0600 |
 | Mac Kimi OAuth／工具发现 | NOT_RUN | 未启动 Kimi 新会话、登录或发现 |
-| 双向 nonce 数据闭环 | NOT_RUN | 待 Dot 与指定 Mac 客户端分别实际调用、读全及核对摘要 |
+| 双向 nonce 数据闭环 | PARTIAL | 新 App 已持久接收一个数据验证 job；Mac 桥授权未完成、尚未本地收件／回传，指定 Dot 读取未验；保留原 ID 续测 |
 | Mac 本地实现与测试 | PASS | 完整 67 项测试：原 Store 17、台账 20、collector 17、hook 10、CLI／安装 3；主执行侧在独立 Mac 环境再次执行通过 |
 | Mac 桥独立安装 | PASS | 独立源码副本、摘要回读、0700 运行目录、0600 配置／钩子定义、实际 SQLite 状态回读及 plist lint；没有启动模型／Herdr／业务 handler |
 | Mac 桥依赖与加密客户端初始化 | PASS | Python 3.13.1 x86_64，FastMCP 4.0.11、MCP 2.3.0、cryptography 48.0.1，共 66 依赖；临时目录中实际构造客户端、私密权限与缺缓存拒绝测试通过，无外部请求 |
@@ -110,6 +110,6 @@ systemd 模板的 `MemoryHigh=192M`、`MemoryMax=256M`、`CPUQuota=50%`、`Tasks
 
 依赖安装曾遇旧内网额外索引超时、PyPI 下载超时及 Linux cryptography 清单不适用于本机 Intel 二进制的问题。最终保留主框架固定版本，按 Mac 平台二进制解析并单独锁定；未更改全局源、既有客户端或系统 Rust。66 包清单见 [Mac 锁定文件](../mac/requirements.lock.macos-py313.txt)。
 
-当前已通过新 App 原生工具持久提交一个明确标记“仅数据验证”的 nonce 任务，状态为 PERSISTED。私密续测记录保留原 job／payload hash／事件 ID；Mac 尚未取得完整授权，未读取、未回传，不重新投递，也不将其记为 Herdr／Agent 任务。真实两端数据闭环仍为 NOT_RUN。Mac 首次登录没有取得成功回执，不能仅凭 RuntimeError 断言用户拒绝或 token endpoint 配置错误。
+当前已通过新 App 原生工具持久提交一个明确标记“仅数据验证”的 nonce 任务，状态为 PERSISTED。私密续测记录保留原 job／payload hash／事件 ID；Mac 尚未取得完整授权，未读取、未回传，不重新投递，也不将其记为 Herdr／Agent 任务。真实两端数据闭环仅到 App 持久接收水位，保留 PARTIAL。Mac 首次登录没有取得成功回执，不能仅凭 RuntimeError 断言用户拒绝或 token endpoint 配置错误。
 
 上线／清理状态：旧包卸载归公子回报；新 App 原生元数据与工具调用归主执行侧；Mac 模拟子进程／fake transport 是本地测试，原生 hook 触发、真实 Dot、Mac OAuth、后台在线和业务验收逐项保留未决。没有执行现场断网／崩溃注入、业务清理或任意自动派发。
