@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-更新：2026-11-02，Asia/Shanghai。目标仓运行代码固定为 `a06dc70e7994df7cb3c92a30cfde4276c26a5759`，初始独立来源为 `7d162860c10ac2d72719522be7fe01478f4747a3`；Mac 初始实现为 `10c2030d6be54c617b53d6ae86a38335975f1b3a`，当前安装固定为 `6ab86765eedad995c83703aac18898b3972c77d6`，10 个源码／依赖清单文件摘要回读一致；VPS 运行代码未因本地适配改动。除特别标明，以下现场证据由主执行侧直接取得。
+更新：2026-11-02，Asia/Shanghai。目标仓运行代码固定为 `a06dc70e7994df7cb3c92a30cfde4276c26a5759`，初始独立来源为 `7d162860c10ac2d72719522be7fe01478f4747a3`；Mac 初始实现为 `10c2030d6be54c617b53d6ae86a38335975f1b3a`，当前安装固定为 `6386d7fa7ba1780adf10bd20af0e669f2f389a5a`，11 个源码／依赖清单文件摘要回读一致；VPS 运行代码未因本地适配改动。除特别标明，以下现场证据由主执行侧直接取得。
 
 | 层次 | 状态 | 已有证据与范围 |
 | --- | --- | --- |
@@ -26,14 +26,14 @@
 | Mac Kimi OAuth／工具发现 | NOT_RUN | 未启动 Kimi 新会话、登录或发现 |
 | 原 nonce 结果交付与 Dot 读取 | PASS | Mac 桥收件／原事件上传 v1，当前桌面会话经云端 App 读全核摘要／nonce 并 ACK；公子另报告指定 Dot 已读取并确认，主执行侧实际回读该精确 job／版本／hash 的独立稳定 ACK 事件。Dot 行为归用户回报，事件持久记录为主执行侧直接取证；Mac 随后实际收取该 ACK，原游标推进且待处理／回传均为 0 |
 | 双向 nonce 全覆盖 | PARTIAL | 上述原任务链路已通过；原任务由桌面会话经云端 App 提交，不能冒称 Dot 发起。Mac 新建任务、Dot 回报的反方向尚未执行 |
-| Mac 本地实现与测试 | PASS | 完整 71 项测试：原 Store 17、台账 20、collector 17、hook 10、CLI／安装 3、浏览器交接／日志 4；主执行侧在独立 Mac 环境再次执行通过 |
+| Mac 本地实现与测试 | PASS | 完整 104 项测试：原 Store 17、台账 20、collector 17、hook 10、CLI／安装 6、浏览器交接／日志 4、引用校验 21、关联综合 9；主执行侧在独立 Mac 环境再次执行通过 |
 | Mac 桥独立安装 | PASS | 独立源码副本、摘要回读、0700 运行目录、0600 配置／钩子定义、实际 SQLite 状态回读及 plist lint；没有启动模型／Herdr／业务 handler |
 | Mac 桥依赖与加密客户端初始化 | PASS | Python 3.13.1 x86_64，FastMCP 4.0.11、MCP 2.3.0、cryptography 48.0.1，共 66 依赖；临时目录中实际构造客户端、私密权限与缺缓存拒绝测试通过，无外部请求 |
 | Codex App 原生钩子触发（已观察四类） | PASS | 公子已审阅并信任已安装定义；主执行侧直接回读本地 live 台账，session 与本对话对应，观察到 SessionStart／PreToolUse／PostToolUse／UserPromptSubmit。只覆盖实际观察的四类，不推定其余三类或 CLI 模型回合已触发 |
 | Mac 桥专用 OAuth | PASS | 公子再次明确要求重新授权后，同一专用客户端完成 token POST 200、后续 MCP 请求 200 及 whoami 成功；保留自有加密缓存，未改代理／TLS／端点。此前尝试的交换状态仍为历史 UNKNOWN |
 | Mac 桥真实网络收件／回传 | PASS | collector 实际接收原 JOB_PERSISTED，get_job 核原 ID／payload 摘要；小结果先本地安全保存并入 outbox，再以原 event_id 上传，回执精确匹配 v1／hash。当前桌面会话经云端 App 实际读全并核对原结果后 ACK；无模型／业务派发 |
 | Mac 人工收件窗口 | PASS | 手动运行 120 秒，启动 3 轮；结束时 collector=OK、待处理事件／报告均为 0，进程已自然退出。只证明此短窗口，不提升为长期在线 |
-| Mac 持续收件进程 | NOT_RUN | launchd 单元已准备，RunAtLoad=false／KeepAlive=false，未 bootstrap／kickstart；授权与短窗口通过后仍未启用常驻 |
+| Mac 持续收件进程 | PASS | 公子明确授权推进后，用户 launchd 已 bootstrap；RunAtLoad=true、KeepAlive=false，原生回读 running／PID 及新的 collector=OK 成功时点。网络错误由进程内退避，认证／协议错误停止；没有异常退出自动重启或长期稳定性验收 |
 | Herdr／模型／业务执行 | NOT_RUN | 信箱没有执行能力；进程、HTTP 或数据闭环均不代替业务验收 |
 
 VPS 当前运行时为 Python 3.14.4、FastMCP 4.0.11、MCP 2.3.0、uvicorn 0.54.0。真实端点、账号、插件 ID、原始输出及认证状态留在私密落点，公开文档只用别名。
@@ -125,4 +125,22 @@ systemd 模板的 `MemoryHigh=192M`、`MemoryMax=256M`、`CPUQuota=50%`、`Tasks
 
 原 nonce 为当前桌面会话经新 App 提交的“仅数据验证”任务。Mac 桥授权成功后，collector 从原日志持久接收并实际 get_job；仅从远端取回的内容计算 nonce 摘要与反序结果，先保存本地结果和原事件 outbox，再上传 v1。主执行侧经同一云端 App 实际读取该版本，与 Mac 原件逐字段及规范化 SHA-256 核对一致，nonce 变换一致，随后登记精确版本／摘要的读 ACK。私密续测记录保留原 job、payload hash、稳定事件、结果及回执；未重建／重发任务。该链路是桌面会话经云端 App 与 Mac 桥的真实闭环；指定 Dot 自身读取已有公子明确回报，主执行侧从服务实际回读独立稳定读 ACK，原 job／v1／hash 一致；这区分用户报告的 Dot 行为与主执行侧直接取得的持久事件证据。Mac 发起反向任务仍未执行。没有 Herdr／Agent 或模型执行。
 
-上线／清理状态：旧包卸载及指定 Dot 两项只读成功归公子回报；新 App 原生元数据／当前会话调用、四类 App hook 台账回读及 Mac 桥 OAuth／原 nonce 收件回传归主执行侧。Mac 模拟子进程／fake transport 仍只作本地测试；其余原生事件、CLI 模型触发、常驻在线、反方向及业务验收逐项未决。没有执行现场断网／崩溃注入、业务清理或任意自动派发。
+上线／清理状态：旧包卸载及指定 Dot 两项只读成功归公子回报；新 App 原生元数据／当前会话调用、四类 App hook 台账回读及 Mac 桥 OAuth／原 nonce 收件回传归主执行侧。Mac 模拟子进程／fake transport 仍只作本地测试；其余原生事件、CLI 模型触发、长期稳定性、反方向及业务验收逐项未决。没有执行现场断网／崩溃注入、业务清理或任意自动派发。
+
+## 2026-11-02 后续 Projects 协作关联
+
+公子重申既有约定：项目代码、文档、Skill、插件及配置模板在所属 GitHub 仓库维护，所有后续项目任务／迭代沿正式 Projects 及原任务关联。排期明确沿用各项目已有 Iteration，不新建统一日期或周期。实际总览及私有引用只保存在受限回执；公开契约与模板见 [docs/projects.md](projects.md)。
+
+当前已建立一个私有统一总览，主执行侧直接回读可见性、字段和两个视图。已登记 Herdr、Task Mailbox、凡人二创三个项目导航及本轮关联任务；导航不填写业务 Status，本轮任务 In Progress 已独立回读。已有业务 Project 的四项在途任务状态由原板保管，未为汇总覆盖状态或迁移执行；其余项目还须逐一登记，不声称所有项目已接入。
+
+Issue create 经当前 GitHub connector 明确返回 403 Resource not accessible by integration。另行只读核得仓库 public、Issues 已启用、用户 ADMIN；这些不证明该连接具有 Issue 写权限。未换凭据或连接重试相同 Issue 创建。Projects MCP 不提供 draft 创建能力，已用本机 gh 在原获准私有总览中建立任务 draft，随后通过 Projects MCP 回读真实 item／draft／Status。任务正文保留在该受控草稿；代码和文档仍在所属仓库，Issue 补关联待原连接写权限修复，不重派。
+
+本轮实现只改 Mac：可选 payload.tracking 保存在本地 routing、binding、会话摘要和只读 hook 提示；业务绑定／报告缺关联时拒绝，结果按原 job 自动附 task_tracking 并拒绝冲突。旧数据任务仍可收件查看和直接数据报告。引用标记 caller supplied／UNVERIFIED，不能当作 GitHub 实际核读；VPS 九工具、数据库与执行权限未变。
+
+### 真实条目关联样本：PASS（数据层）
+
+主执行侧经 Projects MCP 实际核读总览中的当前任务 item、原生 draft ID 与 In Progress，再把这组引用随一个新的独立纯数据 job 提交。Mac 常驻进程实际接收，原 job／payload hash 与本地 tracking 一致；当前真实协调会话已显式绑定，引用仍标 UNVERIFIED，不冒称桥自行访问 GitHub。
+
+本地从已持久收件摘要生成小结果，queue_report 自动附同一 task_tracking 并保存原事件。没有启动第二个网络收件器；原 launchd 进程自动补传取得 v1。当前桌面会话通过原生云端 App 实际读全，与本机安全保存的原件逐字段、规范化 SHA-256、tracking 摘要比对均一致，随后发送精确读 ACK；原后台又实际收取 ACK，持久 cursor 前移，待处理事件和报告均为 0，collector 最新为 OK。完整 ID／hash／回执保存在受控落点与原私有任务正文。
+
+期间曾观察 NETWORK_FAILED，原进程按既有退避继续，随后恢复成功并上传同一事件；未换代理／端点／凭据、未重建任务、未现场注入故障。该自然错误样本与恢复不覆盖所有断网／崩溃情况或 24 小时可靠性。此样本由当前桌面会话经云端 App 发起／读回，不冒称指定 Dot 执行，也没有 Herdr／模型／业务派发。
