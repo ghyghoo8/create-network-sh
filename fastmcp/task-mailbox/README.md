@@ -23,7 +23,7 @@
 | `whoami` | 返回服务识别的认证主体；任务内的身份文字不能代替认证 |
 | `mailbox_usage` | 只读返回记录数、数据库分配页和配置上限，不返回内容或私密路径 |
 
-默认每份任务或结果最大 64 KiB、SQLite 主数据库最大 256 MiB、最多保存 10000 个任务，均可配置。任务条数满额后拒绝新 ID，原 ID 仍可对账；数据库写满时明确失败，不删旧数据、不自动清理或扩额。256 MiB 只限制主数据库，rollback journal、OAuth 状态、日志和依赖另外占用空间。
+默认每份任务或结果最大 1 MiB、SQLite 主数据库最大 256 MiB、最多保存 10000 个任务，均可配置。任务条数满额后拒绝新 ID，原 ID 仍可对账；数据库写满时明确失败，不删旧数据、不自动清理或扩额。256 MiB 只限制主数据库，rollback journal、OAuth 状态、日志和依赖另外占用空间。
 
 OAuth 持久值由 `oauth_storage.py` 使用 Fernet 加密，密钥由本服务稳定签名材料派生；专用目录默认采用 8 MiB／512 文件的保守拒写预算，仅适用于单进程唯一写者，不是宿主文件系统硬配额。主进程日志按 1 MiB × 3 文件轮转，约 3 MiB；启动前错误仍进 journald，配置错误退出 78 且不自动重启。应用不启用 HTTP access log。
 
@@ -50,18 +50,20 @@ python3 -m venv .venv
 
 MCP 测试使用临时回环端点和测试身份；OAuth 存储测试使用临时目录，均不能证明生产 OAuth。服务入口为 `server.py`；配置模板见 [.env.example](.env.example)、[systemd 单元](deployment/task-mailbox.service)和 [HTTPS 路由示例](deployment/caddy-route.example)。[宿主准备脚本](deployment/prepare-host.sh)只准备账户、独立环境与单元，不启动或公开服务；[客户端指引](clients/README.md)覆盖云端、Codex 与 Kimi。模板中的路径、域名和账户都是示意值，部署前按目标宿主核实。
 
-VPS 已有运行时版本回读：Python 3.14.4、FastMCP 4.0.11、MCP 2.3.0、uvicorn 0.54.0。版本信息不代表新服务已部署。现有 Gitee 回环端口 `8765` 保留；本服务候选回环端口为 `8766`，候选外部路径为 `/mailbox/mcp`，路由与认证仍须实际集成验证。
+VPS 运行时为 Python 3.14.4、FastMCP 4.0.11、MCP 2.3.0、uvicorn 0.54.0。本轮信箱已独立启动于回环 `8766`，通过共享 HTTPS 入口的 `/mailbox/` 路由；原 Gitee 回环 `8765` 保留。进程、路由、OAuth、各客户端与双向读取分别记录，当前状态见 [验证记录](docs/verification.md)。
 
 systemd 模板设置 `MemoryHigh=192M`、`MemoryMax=256M`、`CPUQuota=50%`、`TasksMax=32`、`LimitNOFILE=256`，作为保护上限；生产占用、响应时间及长期容量尚未验证。
 
-启动所缺的是新服务的独立 OAuth 身份配置。公子先创建独立 GitHub OAuth App，再在 VPS 本地 TTY 运行 [configure-private.py](deployment/configure-private.py)，通过隐藏输入填写新 App secret；助手不需要您在聊天发送凭据。辅助脚本保留本服务已有签名密钥，只写权限 `0600` 的私密环境文件，不启动服务。完成该配置后才能继续启动、HTTPS 路由与云端登记，具体见[部署步骤](docs/deployment.md#3-独立-oauth-与持久认证状态)。
+初次部署需创建独立 GitHub OAuth App，再在 VPS TTY 用 [configure-private.py](deployment/configure-private.py)隐藏输入 secret；不在聊天传递凭据。本轮配置已由公子完成，独立服务与 HTTPS 路由已启动。具体步骤见[部署说明](docs/deployment.md#3-独立-oauth-与持久认证状态)，客户端授权结果以验证记录为准。
 
 目标 Linux／Python 3.14.4 环境的完整依赖见 [requirements.lock.txt](requirements.lock.txt)。宿主准备脚本按锁定文件安装并禁用 pip 缓存；其他开发平台须另核兼容性。
 
 ## 当前验证
 
-Store 的 17 项标准库行为测试已通过；扩大默认值前，VPS 临时回环 MCP 的 9 工具／两个模拟客户端／账号拒绝／OAuth 元数据验证已通过。当前约 240 KiB UTF-8 传输重跑在 SSH 连接阶段超时，尚未执行。新独立环境的该测试进程峰值 RSS 为 121444 KiB（约 118.6 MiB）；不是生产容量结论。VPS 独立新虚拟环境已创建，占用 125212 KiB（约 122.3 MiB），主执行侧已在此独立环境复跑 MCP 与 OAuth 存储测试，均通过。
+Store 的 17 项标准库行为测试已通过；扩大默认值前，VPS 临时回环 MCP 的 9 工具／两个模拟客户端／账号拒绝／OAuth 元数据验证已通过。当前约 240 KiB UTF-8 传输重跑发生 SSH／观察超时，未取得完整回执，保留 UNKNOWN。新独立环境的该测试进程峰值 RSS 为 121444 KiB（约 118.6 MiB）；不是生产容量结论。VPS 独立新虚拟环境已创建，占用 125212 KiB（约 122.3 MiB），主执行侧已在此独立环境复跑 MCP 与 OAuth 存储测试，均通过。
 
-VPS 常驻新服务、HTTPS、生产 OAuth、云端登记、本地发现、真实双方 nonce 闭环及 Herdr 执行均为 `NOT_RUN`，详见唯一当前验证入口 [docs/verification.md](docs/verification.md)。这些准备与测试不构成部署或长期稳定性验收。
+当前 VPS 进程及未认证 HTTPS 路径已实测；云端私有插件已创建，公子回报已连接。Mac Codex／Kimi 已写入端点配置；Codex 首次 OAuth 在本地回调后的令牌交换失败，Kimi 授权尚未执行。真实工具回读、双方 nonce 闭环及业务执行未验，详见唯一当前验证入口 [docs/verification.md](docs/verification.md)。
+
+后续推荐采用轻量 Mac 收件桥，并用 Codex App 原生钩子衔接查信与回传；[事件与钩子方案](docs/hooks.md)目前是待验证设计，没有安装监听器、启用钩子或授予自动执行权限。
 
 本仓库公开。只提交源码、依赖声明、文档及占位配置；令牌、私钥、OAuth 密钥／状态、数据库、真实连接配置和原始宿主输出保存在各自受限运行目录。

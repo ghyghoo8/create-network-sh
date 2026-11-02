@@ -30,7 +30,7 @@ Next action: copy and verify the closed source set, then index it in this repo.
 | `fastmcp/task-mailbox/` | 本信箱服务的可部署源码与模板 |
 | 既有 ngrok → Caddy `127.0.0.1:19080` | 可复用公网传输入口，不替代应用认证 |
 | 原 Gitee `127.0.0.1:8765` | 保留原路径、OAuth 和运行进程 |
-| 信箱候选 `127.0.0.1:8766` | 新服务独立进程、虚拟环境和私密状态 |
+| 信箱 `127.0.0.1:8766` | 新服务独立进程、虚拟环境和私密状态 |
 | `https://mcp.example.com/mailbox/mcp` | 占位端点；部署时换为获准域名，两端完成各自 OAuth |
 
 [Caddy 路由片段](deployment/caddy-route.example)应放在现有有序 `route` 的默认 Gitee 代理之前，包含 `/mailbox/*` 和两条前缀 OAuth discovery 路径，以及 `4MB` HTTP 包络上限。不是只加入 `/mailbox/mcp`。保留旧 `/auth/callback` 及其他服务路径；先校验再按宿主实际方式加载。
@@ -47,11 +47,11 @@ Next action: copy and verify the closed source set, then index it in this repo.
 
 日期：2026-11-02，Asia/Shanghai。目标工作区接收前为干净状态；本次只新增信箱目录、FastMCP 索引和根导航。没有改写 Gitee 旧来源清单、Headscale 脚本、线上配置或认证。
 
-来源的[验证文档](docs/verification.md)按原字节保留，是来源执行记录，不冒充目标仓或本轮现场验收。来源已有 17 项标准库测试和较小输入的回环／OAuth 存储测试；扩大单份默认值后的 VPS 重跑发生 SSH／观察超时，结果沿原临时引用对账，不能据此认定 Herdr 或 Agent 失败。本次接收不重新派发模型或业务。
+首次接收时，来源的[验证文档](docs/verification.md)按原字节复制；本轮已按目标仓新证据更新为唯一当前验证记录，初始字节基线仍保留在来源清单与 Git 历史。来源已有 17 项标准库测试和较小输入的回环／OAuth 存储测试；扩大单份默认值后的 VPS 重跑发生 SSH／观察超时，结果沿原临时引用对账，不能据此认定 Herdr 或 Agent 失败。本次接收不重新派发模型或业务。
 
-目标目录已通过来源 24 文件摘要／权限与资源闭包检查、17 项标准库 Store 测试、3 项既有 Headscale 回归、Python／Shell 语法及公开内容检查。独立只读复核确认 42 个本地文档链接／锚点有效，旧 Gitee 清单和 Headscale 脚本保持原字节。生产 OAuth、常驻进程、公网端点、Dot 与本地客户端真实双向读取及业务验收继续分别为未验。
+目标目录已通过来源 24 文件摘要／权限与资源闭包检查、17 项标准库 Store 测试、3 项既有 Headscale 回归、Python／Shell 语法及公开内容检查。独立只读复核确认 42 个本地文档链接／锚点有效，旧 Gitee 清单和 Headscale 脚本保持原字节。上述为首次接收时的离线检查；后续进程、路由及客户端证据以[当前验证记录](docs/verification.md)为准。
 
-本轮另已沿既有管理入口，在 VPS 准备目标仓固定提交 `a06dc70e7994df7cb3c92a30cfde4276c26a5759` 的本服务代码；24 个来源摘要核对通过，独立依赖环境、专用账户、私密环境模板和 systemd 单元已准备，单元校验退出 0。没有启动服务或加载新公网路由，原 Gitee 未重启。独立 GitHub OAuth 应用凭据仍需在宿主交互辅助中填写，不能将这些准备记为云端已接通。
+首次部署准备沿既有管理入口，在 VPS 准备目标仓固定提交 `a06dc70e7994df7cb3c92a30cfde4276c26a5759` 的本服务代码；24 个来源摘要核对通过，独立依赖环境、专用账户、私密环境模板和 systemd 单元已准备，单元校验退出 0。没有启动服务或加载新公网路由，原 Gitee 未重启。独立 GitHub OAuth 应用凭据仍需在宿主交互辅助中填写，不能将这些准备记为云端已接通。
 
 从本目录执行：
 
@@ -60,3 +60,11 @@ python3 -m unittest discover -s tests -v
 ```
 
 MCP／加密状态测试需另用本服务独立依赖环境，不能因源码复制或离线检查通过宣布云端已经接通。
+
+## 2026-11-02 增量：服务启动、客户端与钩子设计
+
+运行代码仍来自本仓 `a06dc70e7994df7cb3c92a30cfde4276c26a5759`，与初次来源的运行文件一致；本次没有修改运行代码或依赖。公子完成独立 OAuth 配置后，主执行侧启动本服务，并校验、加载共享 Caddy 的新增前缀路由；Caddy 主进程保持，原 Gitee 未重启。服务、OAuth、云端与本地客户端证据汇总至 [verification.md](docs/verification.md)，实际域名、插件标识及私密配置不入仓库。
+
+本次文档增量为 `README.md`、`SPEC.md`、`clients/README.md`、`docs/deployment.md`、`docs/verification.md` 和本接收记录，并新增 [docs/hooks.md](docs/hooks.md)作为事件与 Codex App 钩子方案。修正 README 的旧 `64 KiB` 为实际 `1 MiB`，以及 SPEC 的旧测试数；不改写 `import-manifest.json` 的初始 24 文件基线。此后的摘要差异是显式目标仓维护，不能再把当前文档字节称作初次来源原样。
+
+钩子设计评审与当前 OAuth 排障分开：新增常驻监听、受控执行处理器、自动派发或故障注入尚未实现／部署。方案文档不扩张执行权限。
