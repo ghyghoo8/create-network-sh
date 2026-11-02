@@ -31,7 +31,7 @@ python3 mac/install.py \
 
 在 Codex 设置的“钩子”或原生 `/hooks` 中审阅新定义并信任精确当前版本。钩子只使用本机 SQLite，超时 3 秒；SessionStart／UserPromptSubmit 的附加上下文只含固定提示、关联 ID／hash 和计数。[官方钩子规则](https://learn.chatgpt.com/docs/hooks#review-and-trust-hooks)
 
-本机实测 `hooks stable true`，未自定义 `CODEX_HOME`，有效定义为 `~/.codex/hooks.json`；同一 Codex host 的 App／CLI 共享这套配置。公子已完成当前定义的审阅信任，主执行侧直接回读 live 台账，session 与本对话匹配，已观察 PreToolUse／PostToolUse／UserPromptSubmit。这里只记录三类已见事件，不固定持续增长的次数；没有运行 CLI 模型 turn，不能由配置共享宣称 CLI 的原生触发已验收。其余事件也须各自取得回执。
+本机实测 `hooks stable true`，未自定义 `CODEX_HOME`，有效定义为 `~/.codex/hooks.json`；同一 Codex host 的 App／CLI 共享这套配置。公子已完成当前定义的审阅信任，主执行侧直接回读 live 台账，session 与本对话匹配，已观察 SessionStart／PreToolUse／PostToolUse／UserPromptSubmit。这里只记录四类已见事件，不固定持续增长的次数；没有运行 CLI 模型 turn，不能由配置共享宣称 CLI 的原生触发已验收。其余事件也须各自取得回执。
 
 ## 授权、查询和运行
 
@@ -46,7 +46,7 @@ python3 mac/install.py \
 
 `login` 才允许用户浏览器完成本桥自己的 OAuth；原授权 URL 先校验同源 HTTPS 与精确 `/authorize` 路径，再直接交给系统浏览器，不另发库的授权页预检 GET。客户端 SDK 日志只保留级别和异常类型，不渲染认证异常正文、参数或堆栈。不读取 Codex／Kimi 的认证缓存。专用缓存加密保存，目录 `0700`、文件 `0600`；正常运行保留同一 client 的静默 refresh。缺缓存或认证明确拒绝停止该分支，不自动重新登录、DCR、换端点或认证方式。OAuth 路径发现也持久保存，重启不把带前缀 token endpoint 简化为站点根路径。
 
-当前专用缓存仍不完整，worker 回读为 AuthRequired；公子授权的第二次受控登录未出现新授权 URL，异常类型链含 RuntimeError／RemoteProtocolError，没有保存原始异常 str／args。两次无凭据 httpx2 issuer GET 分别在响应头前失败、随后返回 200；同路由 MCP POST 返回 401。它们支持偶发传输故障的判断，不证明 OAuth 拒绝或登录成功；代理、TLS 与端点均未因此改变。持续收件进程未启动，原 nonce 仍为 PERSISTED、未被 Mac 取回，不重新投递。
+本桥已完成专用 OAuth 和 whoami 实测，原 nonce 已由 Mac 真实取回、持久入 outbox 并上传；当前桌面会话通过云端 App 读回、核对摘要及 nonce 并确认读取。此前若干尝试的 RemoteProtocolError 不反推为用户拒绝；当前成功也不能推导长期稳定。保留原 job／event，不重新投递；指定 Dot 已报告读取，服务精确 ACK 已直接回读；反方向与持续收件状态见验证记录。
 
 认证发现的两类同源 well-known GET 若在完整响应头前遇到 RemoteProtocolError，每个 client 生命周期最多额外尝试一次，两次共用 10 秒预算。实现固定使用 httpx2 2.16.0 的发送钩子，不替换底层 transport，因此保留环境代理与 TLS；保持原默认不跟随重定向。令牌／注册／refresh／MCP POST、其它 URL、HTTP 错误、超时和响应体错误不走这项重试。既有 outbox 按稳定 event_id 补传的契约不变。
 

@@ -62,7 +62,7 @@ systemd 模板设置 `MemoryHigh=192M`、`MemoryMax=256M`、`CPUQuota=50%`、`Ta
 
 Store 的 17 项标准库行为测试已通过；扩大默认值前，VPS 临时回环 MCP 的 9 工具／两个模拟客户端／账号拒绝／OAuth 元数据验证已通过。当前约 240 KiB UTF-8 传输重跑发生 SSH／观察超时，未取得完整回执，保留 UNKNOWN。新独立环境的该测试进程峰值 RSS 为 121444 KiB（约 118.6 MiB）；不是生产容量结论。VPS 独立新虚拟环境已创建，占用 125212 KiB（约 122.3 MiB），主执行侧已在此独立环境复跑 MCP 与 OAuth 存储测试，均通过。
 
-VPS 进程与 HTTPS 已实测。初次独立包被界面标记为“仅限桌面端”，公子已卸载；现改用公子在 ChatGPT 原生注册的 App 连接作为唯一 Task Mailbox 入口。当前桌面会话已发现该云端连接的九项工具，并直接调用 whoami／mailbox_usage 成功；指定 Dot 调用、Mac 桥数据闭环与业务验收仍分别取证。Mac Codex 原有直接 OAuth 失败与新 App 连接不是同一分支；真实状态见唯一入口 [docs/verification.md](docs/verification.md)。
+VPS 进程与 HTTPS 已实测。初次独立包被界面标记为“仅限桌面端”，公子已卸载；现改用公子在 ChatGPT 原生注册的 App 连接作为唯一 Task Mailbox 入口。当前桌面会话已发现该云端连接的九项工具，并直接调用 whoami／mailbox_usage 成功；指定 Dot 的只读成功归公子回报；Mac 桥授权、原 nonce 收件回传与当前会话经云端 App 的结果读取已实测，指定 Dot 的结果读取归公子回报且服务精确 ACK 已回读，反方向与业务验收仍分别取证。Mac Codex 原有直接 OAuth 失败与新 App 连接不是同一分支；真实状态见唯一入口 [docs/verification.md](docs/verification.md)。
 
 [Mac 适配实现](mac/README.md)已完成并独立安装：台账、collector、钩子、CLI 与安装器共通过 71 项本地测试（含原服务 17 项）。七类钩子定义已写入，原生信任与实际触发、收件桥授权及长期运行分别验收；当前状态统一见验证记录。[事件与钩子方案](docs/hooks.md)保留完整边界，不授予自动执行权限。
 
