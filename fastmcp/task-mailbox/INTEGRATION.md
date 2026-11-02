@@ -68,3 +68,9 @@ MCP／加密状态测试需另用本服务独立依赖环境，不能因源码�
 本次文档增量为 `README.md`、`SPEC.md`、`clients/README.md`、`docs/deployment.md`、`docs/verification.md` 和本接收记录，并新增 [docs/hooks.md](docs/hooks.md)作为事件与 Codex App 钩子方案。修正 README 的旧 `64 KiB` 为实际 `1 MiB`，以及 SPEC 的旧测试数；不改写 `import-manifest.json` 的初始 24 文件基线。此后的摘要差异是显式目标仓维护，不能再把当前文档字节称作初次来源原样。
 
 钩子设计评审与当前 OAuth 排障分开：新增常驻监听、受控执行处理器、自动派发或故障注入尚未实现／部署。方案文档不扩张执行权限。
+
+## 2026-11-02 增量：Mac 协调适配实施
+
+实现固定提交 `10c2030d6be54c617b53d6ae86a38335975f1b3a` 新增 `mac/`、四份对应行为测试与 Mac 操作指引；VPS 运行代码／依赖和初始来源清单不变。67 项测试包含原 Store 17、Mac 台账 20、collector 17、hook 10、CLI／安装 3。Mac 依赖按实际平台另行解析和锁定，不能套用 Linux 依赖清单作为可用保证。
+
+本轮同步维护 README、SPEC、客户端、钩子与当前验证入口。首次 portable 插件的“仅限桌面端”事实已纠正，采用公子原生注册的私有 Task Mailbox App 连接；旧包卸载归公子操作回报，新 App 元数据及当前会话受保护工具回读归主执行侧。当前状态以 [verification.md](docs/verification.md)为准，不凭任一客户端通过推导 Dot 原生读确认。

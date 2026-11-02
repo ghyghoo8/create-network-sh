@@ -97,7 +97,7 @@ def install(runtime, state, endpoint, roots, hook_file, launch_file, source_comm
         atomic_private(backup, hook_file.read_bytes())
     atomic_private(hook_file, (json.dumps(hook_config, ensure_ascii=False, indent=2) + '\n').encode())
     plist = {'Label': LABEL, 'ProgramArguments': [str(python), str(app / 'bridge.py'), '--config', str(config_path), 'run'],
-             'WorkingDirectory': str(app), 'RunAtLoad': True, 'KeepAlive': False,
+             'WorkingDirectory': str(app), 'RunAtLoad': False, 'KeepAlive': False,
              'ThrottleInterval': 60, 'StandardOutPath': '/dev/null',
              'StandardErrorPath': str(state / 'bootstrap.log')}
     atomic_private(launch_file, plistlib.dumps(plist))

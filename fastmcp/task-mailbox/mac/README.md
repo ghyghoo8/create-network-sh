@@ -13,11 +13,11 @@
 
 ## 独立安装
 
-仅使用本地盘。以下路径均为占位示例，运行时凭据、真实端点和配置不进入仓库：
+已验证的 Mac 依赖环境为 Python 3.13.1（x86_64）、FastMCP 4.0.11、MCP 2.3.0、cryptography 48.0.1；[Mac 独立锁定文件](requirements.lock.macos-py313.txt)与 VPS Linux 清单分开。只使用适合本机 Python／架构的二进制依赖，不为安装桥改动系统 Rust。仅使用本地盘。以下路径均为占位示例，运行时凭据、真实端点和配置不进入仓库：
 
 ```bash
-python3 -m venv "$HOME/Library/Application Support/TaskMailbox/.venv"
-"$HOME/Library/Application Support/TaskMailbox/.venv/bin/python" -m pip install -r mac/requirements.txt
+python3.13 -m venv "$HOME/Library/Application Support/TaskMailbox/.venv"
+"$HOME/Library/Application Support/TaskMailbox/.venv/bin/python" -m pip install -r mac/requirements.lock.macos-py313.txt
 python3 mac/install.py \
   --runtime-dir "$HOME/Library/Application Support/TaskMailbox" \
   --state-dir "$HOME/Library/Application Support/TaskMailbox/state" \
@@ -46,7 +46,7 @@ python3 mac/install.py \
 
 `run` 使用单进程文件锁，默认每 30 秒一轮、每页 25、最多 4 页／10 RPC／20 秒；单 RPC 10 秒。网络错误退避 60／120／300 秒，SIGTERM 可结束等待。同步、钩子与本地暂存互不等待远端网络。程序收到取消只记录／提示，不宣称下游已停止。
 
-授权后可先人工运行短窗口；决定采用 launchd 时加载安装器生成的用户单元。`KeepAlive=false` 避免认证故障反复重启；授权或配置修好后需显式重新启动。单元没有打开 Mac 公网端口。Mac 睡眠时不能保证持续感知，恢复后沿原游标补读。
+授权后可先人工运行短窗口；决定采用 launchd 时加载安装器生成的用户单元。`RunAtLoad=false`、`KeepAlive=false`；单元默认既不在下次登录自动拉起，也不在认证故障后反复重启。授权和短窗口验证后才显式加载并启动，修好故障后也需显式重新启动。单元没有打开 Mac 公网端口。Mac 睡眠时不能保证持续感知，恢复后沿原游标补读。
 
 ## 绑定与报告
 

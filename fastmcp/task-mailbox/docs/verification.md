@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-更新：2026-11-02，Asia/Shanghai。目标仓运行代码固定为 `a06dc70e7994df7cb3c92a30cfde4276c26a5759`，初始独立来源为 `7d162860c10ac2d72719522be7fe01478f4747a3`；本轮后续改动仅为文档。除特别标明，以下现场证据由主执行侧直接取得。
+更新：2026-11-02，Asia/Shanghai。目标仓运行代码固定为 `a06dc70e7994df7cb3c92a30cfde4276c26a5759`，初始独立来源为 `7d162860c10ac2d72719522be7fe01478f4747a3`；Mac 适配实现初始固定提交为 `10c2030d6be54c617b53d6ae86a38335975f1b3a`，VPS 运行代码未因本地适配改动。除特别标明，以下现场证据由主执行侧直接取得。
 
 | 层次 | 状态 | 已有证据与范围 |
 | --- | --- | --- |
@@ -16,14 +16,21 @@
 | VPS 常驻新信箱进程 | PASS | 单元 active/running，NRestarts=0，回环受保护端点返回 401；只证明进程层 |
 | 共享 HTTPS 路由与发现 | PASS | 两类 OAuth discovery 为 200 且 issuer/resource 精确匹配，MCP 未认证 POST 为 401；Caddy 校验成功、原主进程保持，旧 Gitee 路径仍为受保护 401 |
 | 生产 OAuth 完整流程 | PARTIAL | 独立 App 配置存在，Mac 首次原生流程收到回调；令牌交换失败，尚无允许主体的受保护工具回读 |
-| 云端私有插件登记 | PASS | 原生创建一次版本 0.1.0，回读同一插件／release 元数据；不是 Dot 发现或调用证据 |
-| 云端连接 | PARTIAL | 公子回报“已连接成功”；当前执行会话未暴露信箱工具，尚无 Dot 原生 whoami／读写回执 |
+| 旧 portable 插件 | PARTIAL | 初次包元数据上传通过，但界面显示“仅限桌面端”；公子已卸载，不再作为当前入口；未由主执行侧验证后台永久删除 |
+| 新 Task Mailbox App 连接 | PASS | 公子通过原生自定义 MCP 流程创建；主执行侧回读 USER／PRIVATE、1.0.0 及原生 App 绑定，未重造服务器或复制凭据 |
+| 当前桌面会话经云端 App 调用 | PASS | 9 工具已实际出现，原生 whoami／mailbox_usage 调用均成功，执行开关为 false；调用者为当前桌面会话，不冒称指定 Dot 已读 |
+| 指定 Dot 原生回读 | NOT_RUN | 等待该 Dot 的实际调用／读确认；不由注册或另一会话调用推定 |
 | Mac Codex 配置 | PASS | 原生命令登记，回读 enabled=true、Streamable HTTP 及正确端点；不推定当前 App 会话已加载 |
 | Mac Codex OAuth | FAIL | CLI 0.166.0-alpha.5.1 本地 callback 后 token exchange 报 Request failed；原因仍未定位，未自动重登或改变认证方式 |
 | Mac Kimi 配置 | PASS | 委托执行侧原子写入 Kimi Code 2.4.1 用户级 MCP 文件、保留既有条目；主执行侧另行直接回读端点匹配与权限 0600 |
 | Mac Kimi OAuth／工具发现 | NOT_RUN | 未启动 Kimi 新会话、登录或发现 |
 | 双向 nonce 数据闭环 | NOT_RUN | 待 Dot 与指定 Mac 客户端分别实际调用、读全及核对摘要 |
-| Codex App 钩子／Mac 收件桥 | NOT_RUN | 仅完成[设计评审](hooks.md)，没有启用钩子、常驻监听或自动执行 |
+| Mac 本地实现与测试 | PASS | 完整 67 项测试：原 Store 17、台账 20、collector 17、hook 10、CLI／安装 3；主执行侧在独立 Mac 环境再次执行通过 |
+| Mac 桥独立安装 | PASS | 独立源码副本、摘要回读、0700 运行目录、0600 配置／钩子定义、实际 SQLite 状态回读及 plist lint；没有启动模型／Herdr／业务 handler |
+| Mac 桥依赖与加密客户端初始化 | PASS | Python 3.13.1 x86_64，FastMCP 4.0.11、MCP 2.3.0、cryptography 48.0.1，共 66 依赖；临时目录中实际构造客户端、私密权限与缺缓存拒绝测试通过，无外部请求 |
+| Codex App 原生钩子触发 | PARTIAL | 七类定义已安装，仅覆盖 Herdr／信箱项目，等待精确版本 review/trust；本机尚未观察到原生 session／hook 事件，不能把模拟子进程称作 App 已触发 |
+| Mac 桥 OAuth／网络收件 | PARTIAL | 专用原生登录打开 Application Access Request；本次返回 RuntimeError，SDK 缓存尚不完整、worker 检查为 AuthRequired。没有自动重登，具体原因 UNKNOWN |
+| Mac 持续收件进程 | NOT_RUN | launchd 单元已准备，RunAtLoad=false／KeepAlive=false，未 bootstrap／kickstart；先授权和短窗口数据验证 |
 | Herdr／模型／业务执行 | NOT_RUN | 信箱没有执行能力；进程、HTTP 或数据闭环均不代替业务验收 |
 
 当前运行时为 Python 3.14.4、FastMCP 4.0.11、MCP 2.3.0、uvicorn 0.54.0。真实端点、账号、插件 ID、原始输出及认证状态留在私密落点，公开文档只用别名。
@@ -32,7 +39,7 @@
 
 部署前单次快照：总 RAM 950.5 MiB、available 658.1 MiB，根盘空闲 13031.3 MiB，1 分钟负载约 0.13。既有 Gitee venv 120.3 MiB，本服务独立 venv 122.3 MiB。早期模拟测试进程峰值 RSS 121444 KiB（约 118.6 MiB），不代表当前大样本或生产负载。
 
-当前常驻单元回读 `MemoryPeak=125485056` 字节（约 119.7 MiB），同次 `MemoryCurrent=34807808` 字节（约 33.2 MiB），NRestarts=0。这是一个时点／启动以来峰值，不是持续余量或 24 小时稳定性验收。
+本轮已回读的常驻单元快照 `MemoryPeak=125485056` 字节（约 119.7 MiB），同次 `MemoryCurrent=34807808` 字节（约 33.2 MiB），NRestarts=0。这是一个时点／启动以来峰值，不是持续余量或 24 小时稳定性验收。
 
 Mac 登录使用客户端原生 CIMD、PKCE S256 和 read:user；临时 loopback 接收端经回读确认属于该次 Codex 登录进程。回调已返回，随后令牌交换失败。仅凭 Request failed 不能归因为回调、GitHub 配置或服务端 OAuth 拒绝。应用错误日志为空也不能证明该请求未到达（应用未启用 access log）。
 
@@ -75,7 +82,7 @@ systemd 模板的 `MemoryHigh=192M`、`MemoryMax=256M`、`CPUQuota=50%`、`Tasks
 
 明确区分 systemd `active`、HTTP 返回、MCP 初始化、工具清单和工具调用；其中一项通过不能填补其他项。用户完成 OAuth 登录前，受保护工具调用保留 `NOT_RUN`；明确认证拒绝记对应分支 `FAIL`，不静默降为无认证。
 
-独立 GitHub OAuth App 的私密配置已由公子完成，不再作为缺失项。本地 Codex 沿首次回调／交换失败定位，云端沿已登记的同一私有插件回读；不因某端失败而重建插件、绕过认证、换供应商或自动重发模型任务。下一验证是各端原生工具清单与 whoami，再做数据 nonce。
+独立 GitHub OAuth App 的私密配置已由公子完成，不再作为缺失项。旧 portable 包已由公子卸载；新原生 App 连接的工具清单、whoami／usage 已由当前会话直接取得。Mac 桥使用自己专用的加密 OAuth 状态，既不读取旧 Codex／Kimi 缓存，也不绕过服务器认证。下一依赖是 Mac 原生授权完整回执与 hook trust，再沿原数据验证任务继续，不重建替代任务。
 
 ## 双向 nonce 验证
 
@@ -96,3 +103,13 @@ systemd 模板的 `MemoryHigh=192M`、`MemoryMax=256M`、`CPUQuota=50%`、`Tasks
 每次更新注明日期／时区、执行侧、版本、测试范围、原任务与事件引用、精确结果版本／摘要，以及尚未覆盖项。公开文档使用稳定别名，实际地址、账号、令牌、配置和原始输出留受限落点。
 
 短时数据闭环不能推导 24 小时可用性。故障注入、主机重启、真实 Herdr／模型回合、业务任务或控制入口切换按各自有效授权另验，不由本页测试结果自动开启。
+
+## 2026-11-02 Mac 安装与当前续测引用
+
+实现运行目录、配置和加密状态均留本机受限位置；只观察公子选定的 Herdr／信箱项目。`SessionStart`、`UserPromptSubmit`、必要工具前后、`Stop`、`Interrupt`、`SessionEnd` 只保存关联与最近观察。结果须显式绑定 session/turn/job，Stop 成功入 outbox 后归档原件；失败保原件，不从回复或 transcript 自动生成业务结果。
+
+依赖安装曾遇旧内网额外索引超时、PyPI 下载超时及 Linux cryptography 清单不适用于本机 Intel 二进制的问题。最终保留主框架固定版本，按 Mac 平台二进制解析并单独锁定；未更改全局源、既有客户端或系统 Rust。66 包清单见 [Mac 锁定文件](../mac/requirements.lock.macos-py313.txt)。
+
+当前已通过新 App 原生工具持久提交一个明确标记“仅数据验证”的 nonce 任务，状态为 PERSISTED。私密续测记录保留原 job／payload hash／事件 ID；Mac 尚未取得完整授权，未读取、未回传，不重新投递，也不将其记为 Herdr／Agent 任务。真实两端数据闭环仍为 NOT_RUN。Mac 首次登录没有取得成功回执，不能仅凭 RuntimeError 断言用户拒绝或 token endpoint 配置错误。
+
+上线／清理状态：旧包卸载归公子回报；新 App 原生元数据与工具调用归主执行侧；Mac 模拟子进程／fake transport 是本地测试，原生 hook 触发、真实 Dot、Mac OAuth、后台在线和业务验收逐项保留未决。没有执行现场断网／崩溃注入、业务清理或任意自动派发。

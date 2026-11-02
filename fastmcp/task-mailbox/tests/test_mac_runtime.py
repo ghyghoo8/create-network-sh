@@ -74,6 +74,7 @@ class MacRuntimeTests(unittest.TestCase):
         with launch.open('rb') as stream:
             plist = plistlib.load(stream)
         self.assertFalse(plist['KeepAlive'])
+        self.assertFalse(plist['RunAtLoad'])
         self.assertIn(str(runtime.resolve() / 'config.json'), plist['ProgramArguments'])
         # Reinstall keeps one owned hook and preserves the same scope/identity.
         install(runtime, self.state, 'https://mcp.example.com/mailbox/mcp',

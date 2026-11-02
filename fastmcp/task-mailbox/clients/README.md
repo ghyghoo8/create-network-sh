@@ -23,11 +23,15 @@ Codex App 的“钩子”可用于会话查信、结果入本地待发队列等�
 
 配置与登录行为依据 [Kimi Code 官方 MCP 文档](https://github.com/MoonshotAI/kimi-code/blob/main/docs/en/customization/mcp.md)。当前机器 Kimi Code 2.4.1 不提供 `mcp add` 子命令；委托执行侧已将端点原子写入其用户级 MCP 配置并核对保留既有条目；主执行侧另行回读端点匹配与文件权限 `0600`。尚未启动 Kimi 新会话、登录或回读工具。
 
-## ChatGPT 云端／Dot
+## 同一 Task Mailbox：桌面 App 与云端
 
-[cloud-plugin](cloud-plugin/) 仅保存 portable plugin 的源模板。实际端点验证后，将 `.example` 文件复制为 `plugin.json` 和 `mcp.json`，填入真实 HTTPS 端点，校验并打包到临时产物目录，再通过获准的插件连接流程登记、安装并完成 OAuth。不要上传带占位端点的包来试探登记；不要把认证密钥打进包中。
+初次通过 Plugin Creator 上传的 portable MCP 包被原生界面标为“仅限桌面端”，公子已卸载它。上传、保存 OAuth 字段与云端连接是不同步骤，不能再次把模板上传当作云端注册成功。
 
-插件元数据有严格长度／格式要求，修改后需重新验证。本轮已从此模板创建账号下的私有插件 `0.1.0` 并回读登记元数据，公子回报已连接。实际地址和插件标识只留私密交付；仓库模板继续使用占位值。当前执行会话尚未发现信箱工具，因此不能将上传、用户连接回报代替 Dot 的原生工具调用或结果读取。云端认证与注册依据 [OpenAI MCP 接入说明](https://developers.openai.com/api/docs/mcp#handle-authentication)。
+当前唯一入口为公子通过 ChatGPT「插件 → ＋ → 添加自定义 MCP 服务器」注册的 Task Mailbox App 连接；其原生 App 绑定已回读确认，实际地址和标识只留私密配置。新入口可由桌面与云端各自选用和授权；当前桌面会话的九项工具发现、whoami／mailbox_usage 已直接通过，指定 Dot 的读取仍单独取证。[官方原生连接流程](https://developers.openai.com/plugins/build/plugins#create-and-test-a-plugin-locally-with-an-mcp-server)
+
+[cloud-plugin](cloud-plugin/)中的原 portable `.example` 文件保留为初始来源和桌面 MCP 模板，不再用它们新建另一个“仅限桌面端”的云端替身。若后续确需包装已注册 App，必须从原生文件读取真实 App ID，以 `.app.json` 及 `extensions.com.openai.apps` 绑定，保留该 App 的身份、认证与源；不得把插件 URL 的 ID 改前缀猜成 App ID。
+
+Mac 主动收件、项目感知及显式结果回传由独立 [协调桥](../mac/README.md)承担。它不靠插件本身在空闲时自动运行，不把本地 command hook 打进云端 App 使它再次依赖本地执行。
 
 ## 双向验收
 
