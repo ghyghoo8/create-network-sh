@@ -51,6 +51,8 @@ Next action: copy and verify the closed source set, then index it in this repo.
 
 目标目录已通过来源 24 文件摘要／权限与资源闭包检查、17 项标准库 Store 测试、3 项既有 Headscale 回归、Python／Shell 语法及公开内容检查。独立只读复核确认 42 个本地文档链接／锚点有效，旧 Gitee 清单和 Headscale 脚本保持原字节。生产 OAuth、常驻进程、公网端点、Dot 与本地客户端真实双向读取及业务验收继续分别为未验。
 
+本轮另已沿既有管理入口，在 VPS 准备目标仓固定提交 `a06dc70e7994df7cb3c92a30cfde4276c26a5759` 的本服务代码；24 个来源摘要核对通过，独立依赖环境、专用账户、私密环境模板和 systemd 单元已准备，单元校验退出 0。没有启动服务或加载新公网路由，原 Gitee 未重启。独立 GitHub OAuth 应用凭据仍需在宿主交互辅助中填写，不能将这些准备记为云端已接通。
+
 从本目录执行：
 
 ```bash
