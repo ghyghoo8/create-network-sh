@@ -54,3 +54,14 @@ VPS 临时回环重跑已取得 9 工具、两个模拟客户端收发、账号�
 ## 后续事件与 Codex App 钩子
 
 [事件与钩子方案](docs/hooks.md)已有 [Mac 实现](mac/README.md)：单 collector、原子本机收件／游标、项目关联、会话观察、显式 session/turn/job 报告和稳定 ID 补传。公子已授权推进这一范围，感知限定 Herdr 与信箱项目；生命周期钩子仅作适配器，不执行任意任务。VPS 九项工具契约、取消语义和认证边界保持不变，云端 Dot 唤醒及受控执行 handler 仍未实现。
+
+## GitHub Projects 关联增量
+
+ARCHITECTURE TRIAGE
+- Path: BOUNDARY_NOTE
+- Evidence: 现有 payload v1 完整持久化额外字段；Mac routing 原来只保留目标和报告路由，项目协作规范已有 Projects／Issues 权威入口。
+- Boundary impact: 新增可选 payload.tracking 的本机持久关联、项目会话绑定准入及 result.task_tracking；现有数据任务收发兼容，VPS 九工具与业务执行／写权不变。
+- Preserved: Projects／原任务持正式状态与验收，仓库存项目资产；Mac 只收件和补传，不新增 GitHub 凭据、自动写 API 或 AI。
+- Verification: 引用结构、不可变身份、绑定／暂存／Stop／outbox 连贯性与旧数据路径测试，以及真实条目引用的纯数据收件／回报。
+
+详细字段、Issue／Project draft 两类来源、沿用各项目 Iteration 和派发前核读见[关联契约](docs/projects.md)。引用中的 UNVERIFIED 状态不代替 GitHub 读回；读确认不自动完成或关闭任务。

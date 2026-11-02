@@ -24,7 +24,11 @@ class HookTests(unittest.TestCase):
         # Use the actual mailbox contract for canonical job/hash construction.
         remote = Store(self.root / 'remote.sqlite3')
         payload = {'schema_version': 1, 'origin_task_id': 'origin', 'sender': 'dot', 'recipient': 'mac',
-                   'report_route': 'original', 'target': {'project': 'test'}, 'content': 'UNTRUSTED_BODY'}
+                   'report_route': 'original', 'target': {'project': 'test'}, 'content': 'UNTRUSTED_BODY',
+                   'tracking': {'repository': 'example/source',
+                       'project_url': 'https://github.com/orgs/example/projects/1', 'item_id': 1,
+                       'issue_url': 'https://github.com/example/source/issues/1',
+                       'iteration': {'state': 'UNSCHEDULED', 'reason': 'Local lifecycle test'}}}
         import hashlib
         digest = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()
         self.job = remote.submit_job('job-hook', payload, digest)

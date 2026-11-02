@@ -13,6 +13,7 @@ import tempfile
 
 from config import DEFAULT_CONFIG, in_scope, load_config, open_store
 from codex_hook import draft_lock, draft_path
+from tracking import attach_tracking
 
 
 def write_private_json(path, value):
@@ -93,12 +94,15 @@ def main():
         binding = store.session_binding(args.session_id)
         if not binding or not in_scope(config, binding['cwd']):
             parser.error('session must first be bound within a configured project')
+        if 'tracking' not in binding['job']:
+            parser.error('bound job has no GitHub tracking; preserve its payload/hash and reconcile the original task association without redispatching work')
         result_file = Path(args.result_file)
         if not result_file.is_file() or result_file.stat().st_size > 1024 * 1024:
             parser.error('result file must be a JSON object up to 1 MiB')
         result = json.loads(result_file.read_text())
         if not isinstance(result, dict):
             parser.error('result must be a JSON object')
+        result = attach_tracking(result, binding['job'].get('tracking'))
         if len(json.dumps(result, ensure_ascii=False, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()) > 1024 * 1024:
             parser.error('canonical result exceeds 1 MiB')
         draft = {'session_id': args.session_id, 'turn_id': args.turn_id, 'job_id': binding['job_id'], 'event_id': args.event_id, 'status': args.status, 'result': result}

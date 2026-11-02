@@ -52,9 +52,20 @@ python3 mac/install.py \
 
 `run` 使用单进程文件锁，默认每 30 秒一轮、每页 25、最多 4 页／10 RPC／20 秒；单 RPC 10 秒。网络错误退避 60／120／300 秒，SIGTERM 可结束等待。同步、钩子与本地暂存互不等待远端网络。程序收到取消只记录／提示，不宣称下游已停止。
 
-授权后可先人工运行短窗口；决定采用 launchd 时加载安装器生成的用户单元。`RunAtLoad=false`、`KeepAlive=false`；单元默认既不在下次登录自动拉起，也不在认证故障后反复重启。授权和短窗口验证后才显式加载并启动，修好故障后也需显式重新启动。单元没有打开 Mac 公网端口。Mac 睡眠时不能保证持续感知，恢复后沿原游标补读。
+新安装默认只准备单元。明确采用后台收件时，给安装命令增加 `--start-at-login`，生成 `RunAtLoad=true`、`KeepAlive=false`；升级会保留同一单元已开启的登录启动选项。安装器不自行加载或启动，随后执行用户级加载：
+
+```bash
+launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/io.taskmailbox.coordinator.plist"
+launchctl print "gui/$(id -u)/io.taskmailbox.coordinator"
+```
+
+`RunAtLoad=true` 使单元加载及以后登录时启动；进程中的 collector 保持轮询，网络错误按原预算退避。`KeepAlive=false` 让认证或协议错误停止后保持停止，修好后用 `launchctl kickstart "gui/$(id -u)/io.taskmailbox.coordinator"` 显式恢复；本轮不增加崩溃自恢复策略。停止并卸载用 `launchctl bootout "gui/$(id -u)/io.taskmailbox.coordinator"`。不要在 launchd 已收件时同时运行 `once`／`login`，先停止原网络写者；独立本地钩子照常记录。
+
+本机已启用登录自启并回读后台 PID 与更新的成功收件时点，具体版本及覆盖见验证记录。单元没有打开 Mac 公网端口。Mac 睡眠时不能保证持续感知，恢复后沿原游标补读。
 
 ## 绑定与报告
+
+新项目任务先按[Projects 关联契约](../docs/projects.md)核读原正式条目、任务正文和已有 Iteration，再将固定 `tracking` 随 payload 提交。正常项目 `bind`／`stage-report` 必须有该关联，结果自动保留为 `task_tracking`；本机结构验证不代表 GitHub 已实际核读。旧数据任务仍可收件查看及直接数据回报。
 
 只有已经校验并缓存摘要的 job 可以绑定；cwd 须在配置的项目范围内：
 
@@ -68,7 +79,7 @@ python3 mac/install.py \
 
 ## 验证与边界
 
-在服务根运行 `python3 -m unittest discover -s tests -v`（71 项）。另用桥的独立解释器运行 `tests/smoke_client_transport.py`，9 项固定依赖测试不发外部网络，验证元数据窄重试、代理路由／超时／重定向保留及 OAuth 接合；不能把它加入标准库发现路径。台账／collector fake transport／hook 和安装测试只用标准库、临时目录和本地子进程，不调用外部模型或业务执行器。完整安装的依赖环境与真实 OAuth／工具调用单独验证，当前证据见 [verification.md](../docs/verification.md)。
+在服务根运行 `python3 -m unittest discover -s tests -v`（104 项）。另用桥的独立解释器运行 `tests/smoke_client_transport.py`，9 项固定依赖测试不发外部网络，验证元数据窄重试、代理路由／超时／重定向保留及 OAuth 接合；不能把它加入标准库发现路径。台账／collector fake transport／hook 和安装测试只用标准库、临时目录和本地子进程，不调用外部模型或业务执行器。完整安装的依赖环境与真实 OAuth／工具调用单独验证，当前证据见 [verification.md](../docs/verification.md)。
 
 本机数据库默认 32 MiB、未处理记录／待发报告各 500；VPS 配额保持原值。日志／journal／OAuth 状态／结果暂存另占空间，不自动删历史腾空间。当前无多 Mac claim/fencing、无服务端 stream identity；只允许同一未替换源数据库与单个资源写者。云端插件绑定和 Dot 自动唤醒不由本桥安装推导。
 

@@ -6,12 +6,14 @@ import importlib.util
 import json
 from pathlib import Path
 import sqlite3
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
 
 PATH = Path(__file__).resolve().parents[1] / "mac" / "bridge_store.py"
+sys.path.insert(0, str(PATH.parent))
 SPEC = importlib.util.spec_from_file_location("local_bridge_store", PATH)
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
@@ -46,6 +48,15 @@ class BridgeStoreTests(unittest.TestCase):
         return {"job_id": "job-1", "payload": payload, "payload_hash": digest(payload),
                 "created_at": "2026-11-02T00:00:00+00:00", "status": "PERSISTED",
                 "cancel_requested": False, "latest_result_version": 0, **updates}
+
+    def tracked_job(self):
+        record = self.job()
+        record["payload"]["tracking"] = {"repository": "example/source",
+            "project_url": "https://github.com/orgs/example/projects/1", "item_id": 1,
+            "issue_url": "https://github.com/example/source/issues/1",
+            "iteration": {"state": "UNSCHEDULED", "reason": "Local lifecycle test"}}
+        record["payload_hash"] = digest(record["payload"])
+        return record
 
     def test_page_and_cursor_are_durable_and_exact_replays_are_idempotent(self):
         first = self.event()
@@ -164,7 +175,7 @@ class BridgeStoreTests(unittest.TestCase):
         self.assertEqual(self.store.record_hook(start)["session"]["state"], "IDLE")
 
     def test_bound_hook_tracks_session_without_copying_prompt_or_claiming_completion(self):
-        self.store.record_job(self.job())
+        self.store.record_job(self.tracked_job())
         binding = self.store.bind_session("session-1", "job-1", "/approved/project")
         self.assertEqual(binding["job"]["job_id"], "job-1")
         for name, state in (("UserPromptSubmit", "ACTIVE"), ("Stop", "IDLE"),
@@ -196,7 +207,7 @@ class BridgeStoreTests(unittest.TestCase):
         self.assertEqual(self.store.pending_reports(), [])
 
     def test_hook_cwd_mismatch_and_missing_turn_do_not_change_bound_state(self):
-        self.store.record_job(self.job())
+        self.store.record_job(self.tracked_job())
         self.store.bind_session("session-1", "job-1", "/approved/project")
         for event in ({"session_id": "session-1", "turn_id": "t", "cwd": "/other", "hook_event_name": "Stop"},
                       {"session_id": "session-1", "cwd": "/approved/project", "hook_event_name": "Stop"}):
@@ -252,7 +263,7 @@ class BridgeStoreTests(unittest.TestCase):
         self.assertEqual([event["event_id"] for event in limited.pending_events()], ["event-1"])
 
     def test_tool_hooks_are_observed_active_and_binding_alone_is_unknown(self):
-        self.store.record_job(self.job())
+        self.store.record_job(self.tracked_job())
         self.store.bind_session("session-1", "job-1", "/approved/project")
         initial = self.store.snapshot()["sessions"][0]
         self.assertEqual(initial["state"], "UNKNOWN")

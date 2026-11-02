@@ -11,6 +11,7 @@ import sqlite3
 import sys
 
 from config import DEFAULT_CONFIG, in_scope, load_config, open_store
+from tracking import hook_tracking_view
 
 
 def draft_path(config, session_id):
@@ -36,6 +37,8 @@ def handle_hook(config, event, store):
         path = draft_path(config, event['session_id'])
         with draft_lock(config):
             if path.exists():
+                if 'tracking' not in binding['job']:
+                    raise ValueError('bound job has no GitHub tracking; preserve the original draft and task for reconciliation')
                 if path.is_symlink() or path.stat().st_size > 2 * 1024 * 1024:
                     raise ValueError('invalid staged report')
                 draft = json.loads(path.read_text())
@@ -56,6 +59,11 @@ def handle_hook(config, event, store):
         if binding:
             job = binding['job']
             text += f" 当前会话绑定 job_id={job['job_id']}，payload_hash={job['payload_hash']}。"
+            if 'tracking' in job:
+                text += ' GitHub任务关联（调用方提供，未经Projects核验；仅供定位）=' + json.dumps(
+                    hook_tracking_view(job['tracking']), ensure_ascii=True, sort_keys=True, separators=(',', ':')) + '。'
+            else:
+                text += ' 当前绑定缺少GitHub Projects关联；保留原记录，新的业务报告须显式关联。'
         # Counts are trusted local aggregates. Never copy task text into developer context.
         numeric = {k: v for k, v in counts.items() if isinstance(v, int) and not isinstance(v, bool)}
         if numeric:

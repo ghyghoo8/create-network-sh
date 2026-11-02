@@ -9,6 +9,11 @@ from pathlib import Path
 import re
 import sqlite3
 
+if __package__:
+    from .tracking import attach_tracking, validate_tracking
+else:
+    from tracking import attach_tracking, validate_tracking
+
 
 ID = re.compile(r"[A-Za-z0-9._:-]{1,128}\Z", re.ASCII)
 DIGEST = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
@@ -203,7 +208,10 @@ class BridgeStore:
         row = connection.execute("SELECT * FROM jobs WHERE job_id=?", (job_id,)).fetchone()
         if row is None:
             raise KeyError(job_id)
-        return {**json.loads(row["routing"]), "routing_is_caller_supplied": True,
+        routing = json.loads(row["routing"])
+        if "tracking" in routing:
+            routing.update(tracking_is_caller_supplied=True, tracking_verification="UNVERIFIED")
+        return {**routing, "routing_is_caller_supplied": True,
                 "job_id": row["job_id"], "payload_hash": row["payload_hash"], "status": row["status"],
                 "cancel_requested": bool(row["cancel_requested"]), "latest_result_version": row["latest_result_version"]}
 
@@ -222,7 +230,10 @@ class BridgeStore:
                 raise ValueError("job routing fields must be nonempty strings")
         if not isinstance(payload.get("target"), dict) or not payload["target"] or not isinstance(payload.get("content"), str):
             raise ValueError("job needs an explicit target and text content")
-        routing = _json({key: payload[key] for key in ("origin_task_id", "recipient", "report_route", "target")}, 65536)
+        routing = {key: payload[key] for key in ("origin_task_id", "recipient", "report_route", "target")}
+        if "tracking" in payload:
+            routing["tracking"] = validate_tracking(payload["tracking"])
+        routing = _json(routing, 65536)
         status = record.get("status")
         if not isinstance(status, str) or status not in STATUSES | {"PERSISTED"} or type(record.get("cancel_requested")) is not bool:
             raise ValueError("invalid reported job state")
@@ -233,7 +244,8 @@ class BridgeStore:
         with self._transaction() as connection:
             previous = connection.execute("SELECT * FROM jobs WHERE job_id=?", (job_id,)).fetchone()
             if previous is not None:
-                if previous["payload_hash"] != record["payload_hash"] or previous["created_at"] != created_at:
+                if (previous["payload_hash"] != record["payload_hash"] or previous["created_at"] != created_at
+                        or previous["routing"] != routing):
                     raise ValueError("immutable job identity changed")
                 if (version < previous["latest_result_version"] or (previous["cancel_requested"] and not record["cancel_requested"])
                         or (version == previous["latest_result_version"] and previous["status"] != status)):
@@ -260,7 +272,8 @@ class BridgeStore:
         _id(job_id, "job_id")
         cwd = _cwd(cwd)
         with self._transaction() as connection:
-            self._job(connection, job_id)
+            if "tracking" not in self._job(connection, job_id):
+                raise ValueError("project session binding requires explicit GitHub tracking; reconcile the original task without changing its payload/hash or redispatching work")
             connection.execute("INSERT INTO sessions VALUES (?,?,?,'UNKNOWN','','','') ON CONFLICT(session_id) DO UPDATE SET job_id=excluded.job_id,cwd=excluded.cwd",
                                (session_id, job_id, cwd))
             return self._binding(connection, session_id)
@@ -316,10 +329,10 @@ class BridgeStore:
         _id(event_id, "event_id")
         if event_id.startswith("submitted:") or not isinstance(status, str) or status not in STATUSES or not isinstance(result, dict):
             raise ValueError("invalid report identity, status, or result")
-        content = _json(result)
-        result_hash = _hash(content)
         with self._transaction() as connection:
-            self._job(connection, job_id)
+            job = self._job(connection, job_id)
+            content = _json(attach_tracking(result, job.get("tracking")))
+            result_hash = _hash(content)
             previous = connection.execute("SELECT * FROM reports WHERE event_id=?", (event_id,)).fetchone()
             if previous is not None:
                 if (previous["job_id"], previous["status"], previous["result"]) != (job_id, status, content):
@@ -371,10 +384,14 @@ class BridgeStore:
             sessions = []
             for row in connection.execute("SELECT * FROM sessions ORDER BY updated_at DESC LIMIT 100"):
                 job = self._job(connection, row["job_id"]) if row["job_id"] else None
-                sessions.append({"session_id": row["session_id"], "state": row["state"], "job_id": row["job_id"],
+                session = {"session_id": row["session_id"], "state": row["state"], "job_id": row["job_id"],
                     "payload_hash": job["payload_hash"] if job else None, "last_event": row["last_event"],
                     "last_turn_id": row["last_turn_id"], "observed_at": row["updated_at"] or None,
-                    "updated_at": row["updated_at"] or None})
+                    "updated_at": row["updated_at"] or None}
+                if job and "tracking" in job:
+                    session.update(tracking=job["tracking"], tracking_is_caller_supplied=True,
+                                   tracking_verification="UNVERIFIED")
+                sessions.append(session)
             recent_results = []
             cancel = {job["job_id"] for job in jobs if job["cancel_requested"]}
             reported = {job["job_id"]: (job["latest_result_version"], job["status"]) for job in jobs}
