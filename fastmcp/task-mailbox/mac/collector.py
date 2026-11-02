@@ -259,6 +259,8 @@ async def create_client(endpoint, state_directory, *, allow_login=False):
     from fastmcp import Client
     from fastmcp.client.transports import StreamableHttpTransport
     from metadata_transport import metadata_client_factory
+    from browser_authorization import open_browser_authorization, sanitize_client_logging
+    sanitize_client_logging()
     from fastmcp.client.auth import OAuth
     from fastmcp.client.auth.oauth import TokenStorageAdapter
     from key_value.aio.stores.filetree import (FileTreeStore,
@@ -349,7 +351,12 @@ async def create_client(endpoint, state_directory, *, allow_login=False):
         async def redirect_handler(self, authorization_url):
             if not allow_login:
                 raise AuthFailed("INTERACTIVE_AUTH_DISABLED")
-            return await super().redirect_handler(authorization_url)
+            try:
+                open_browser_authorization(endpoint, authorization_url)
+            except ValueError as error:
+                raise AuthFailed("AUTHORIZATION_DESTINATION_REJECTED") from error
+            except OSError as error:
+                raise AuthFailed("BROWSER_OPEN_FAILED") from error
 
         async def callback_handler(self):
             if not allow_login:

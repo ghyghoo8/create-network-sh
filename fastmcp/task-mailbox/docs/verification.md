@@ -25,7 +25,7 @@
 | Mac Kimi 配置 | PASS | 委托执行侧原子写入 Kimi Code 2.4.1 用户级 MCP 文件、保留既有条目；主执行侧另行直接回读端点匹配与权限 0600 |
 | Mac Kimi OAuth／工具发现 | NOT_RUN | 未启动 Kimi 新会话、登录或发现 |
 | 双向 nonce 数据闭环 | PARTIAL | 原数据验证 job 仍为 PERSISTED；Mac 桥尚未取回／回传，指定 Dot 对原 job／结果的读取未验；保留原 job／hash／事件引用，不重发 |
-| Mac 本地实现与测试 | PASS | 完整 67 项测试：原 Store 17、台账 20、collector 17、hook 10、CLI／安装 3；主执行侧在独立 Mac 环境再次执行通过 |
+| Mac 本地实现与测试 | PASS | 完整 71 项测试：原 Store 17、台账 20、collector 17、hook 10、CLI／安装 3、浏览器交接／日志 4；主执行侧在独立 Mac 环境再次执行通过 |
 | Mac 桥独立安装 | PASS | 独立源码副本、摘要回读、0700 运行目录、0600 配置／钩子定义、实际 SQLite 状态回读及 plist lint；没有启动模型／Herdr／业务 handler |
 | Mac 桥依赖与加密客户端初始化 | PASS | Python 3.13.1 x86_64，FastMCP 4.0.11、MCP 2.3.0、cryptography 48.0.1，共 66 依赖；临时目录中实际构造客户端、私密权限与缺缓存拒绝测试通过，无外部请求 |
 | Codex App 原生钩子触发（已观察三类） | PASS | 公子已审阅并信任已安装定义；主执行侧直接回读本地 live 台账，session 与本对话对应，观察到 PreToolUse／PostToolUse／UserPromptSubmit。只覆盖实际观察的三类，不推定其余四类或 CLI 模型回合已触发 |
@@ -52,7 +52,9 @@ Mac 登录使用客户端原生 CIMD、PKCE S256 和 read:user；临时 loopback
 
 Mac 桥的第二次受控登录只记录异常类型链，不记录可能含凭据的异常 str／args。另用 httpx2 做无凭据诊断：一次 issuer GET 在 2.233 秒、响应头到达前出现 RemoteProtocolError，同次 MCP POST 得到 401；随后以同一默认参数和同一发现 URL 再做一次 GET，5.043 秒得到 200，issuer 与 token endpoint 前缀正确。这些结果支持偶发传输故障的判断，未构成 OAuth 拒绝证据，也没有确定具体 TLS／代理／路由根因。没有改变代理、TLS 或端点，不能将诊断样本当作登录成功。
 
-针对上述已复现的响应头前中断，新增仅同源两类 well-known 元数据 GET 的一次窄重试，固定 httpx2 2.16.0；两次请求共用 10 秒，不替换底层代理／TLS、不跟随重定向，也不在 HTTP 层重发任何 POST。主执行侧运行 67 项标准库回归及 8 项专用依赖假传输测试均通过，后者含实际 OAuth／MCP 共用工厂的离线接合；真实登录恢复仍须另验，不以这些本地测试提升授权状态。
+针对上述已复现的响应头前中断，新增仅同源两类 well-known 元数据 GET 的一次窄重试，固定 httpx2 2.16.0；两次请求共用 10 秒，不替换底层代理／TLS、不跟随重定向，也不在 HTTP 层重发任何 POST。主执行侧运行 71 项标准库回归及 9 项专用依赖假传输测试均通过，后者含实际 OAuth／MCP 共用工厂的离线接合；真实登录恢复仍须另验，不以这些本地测试提升授权状态。
+
+安装窄重试后的受控登录已越过元数据发现，但在 SDK 额外的授权页预检 GET 中再次出现响应头前断开，尚未打开新浏览器。已改用 SDK 支持的原生浏览器回调：只向同源 HTTPS 精确 `/authorize` 地址交接原 URL，不重复 headless 预检，保留 PKCE／state／服务端校验；worker 仍拒绝新交互。实际接合测试确认零额外 HTTP、一次原 URL 浏览器交接。为避免 SDK 异常日志包含认证响应，只记录客户端日志级别／异常类型；首次真实恢复仍须验证，不提升为授权通过。
 
 ## 本地 Store 验证
 

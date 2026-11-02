@@ -44,7 +44,7 @@ python3 mac/install.py \
 ../.venv/bin/python bridge.py run
 ```
 
-`login` 才允许用户浏览器完成本桥自己的 OAuth，不读取 Codex／Kimi 的认证缓存。专用缓存加密保存，目录 `0700`、文件 `0600`；正常运行保留同一 client 的静默 refresh。缺缓存或认证明确拒绝停止该分支，不自动重新登录、DCR、换端点或认证方式。OAuth 路径发现也持久保存，重启不把带前缀 token endpoint 简化为站点根路径。
+`login` 才允许用户浏览器完成本桥自己的 OAuth；原授权 URL 先校验同源 HTTPS 与精确 `/authorize` 路径，再直接交给系统浏览器，不另发库的授权页预检 GET。客户端 SDK 日志只保留级别和异常类型，不渲染认证异常正文、参数或堆栈。不读取 Codex／Kimi 的认证缓存。专用缓存加密保存，目录 `0700`、文件 `0600`；正常运行保留同一 client 的静默 refresh。缺缓存或认证明确拒绝停止该分支，不自动重新登录、DCR、换端点或认证方式。OAuth 路径发现也持久保存，重启不把带前缀 token endpoint 简化为站点根路径。
 
 当前专用缓存仍不完整，worker 回读为 AuthRequired；公子授权的第二次受控登录未出现新授权 URL，异常类型链含 RuntimeError／RemoteProtocolError，没有保存原始异常 str／args。两次无凭据 httpx2 issuer GET 分别在响应头前失败、随后返回 200；同路由 MCP POST 返回 401。它们支持偶发传输故障的判断，不证明 OAuth 拒绝或登录成功；代理、TLS 与端点均未因此改变。持续收件进程未启动，原 nonce 仍为 PERSISTED、未被 Mac 取回，不重新投递。
 
@@ -68,7 +68,7 @@ python3 mac/install.py \
 
 ## 验证与边界
 
-在服务根运行 `python3 -m unittest discover -s tests -v`（67 项）。另用桥的独立解释器运行 `tests/smoke_client_transport.py`，8 项固定依赖测试不发外部网络，验证元数据窄重试、代理路由／超时／重定向保留及 OAuth 接合；不能把它加入标准库发现路径。台账／collector fake transport／hook 和安装测试只用标准库、临时目录和本地子进程，不调用外部模型或业务执行器。完整安装的依赖环境与真实 OAuth／工具调用单独验证，当前证据见 [verification.md](../docs/verification.md)。
+在服务根运行 `python3 -m unittest discover -s tests -v`（71 项）。另用桥的独立解释器运行 `tests/smoke_client_transport.py`，9 项固定依赖测试不发外部网络，验证元数据窄重试、代理路由／超时／重定向保留及 OAuth 接合；不能把它加入标准库发现路径。台账／collector fake transport／hook 和安装测试只用标准库、临时目录和本地子进程，不调用外部模型或业务执行器。完整安装的依赖环境与真实 OAuth／工具调用单独验证，当前证据见 [verification.md](../docs/verification.md)。
 
 本机数据库默认 32 MiB、未处理记录／待发报告各 500；VPS 配额保持原值。日志／journal／OAuth 状态／结果暂存另占空间，不自动删历史腾空间。当前无多 Mac claim/fencing、无服务端 stream identity；只允许同一未替换源数据库与单个资源写者。云端插件绑定和 Dot 自动唤醒不由本桥安装推导。
 

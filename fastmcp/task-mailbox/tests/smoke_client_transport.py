@@ -1,6 +1,8 @@
 """Dependency smoke: pinned HTTP transport recovery, no real network or tokens."""
 
 import asyncio
+import contextlib
+import io
 from pathlib import Path
 import sys
 import tempfile
@@ -108,6 +110,18 @@ class MetadataTransportTests(unittest.IsolatedAsyncioTestCase):
                 with patch.object(httpx2.AsyncClient, '_send_single_request', sender):
                     self.assertEqual(200, (await client.send(request)).status_code)
             self.assertEqual(2, sender.await_count)
+
+    async def test_login_hands_authorization_to_browser_without_headless_get(self):
+        from collector import create_client
+        with tempfile.TemporaryDirectory() as temporary:
+            bridge = await create_client('https://mcp.example.com/mailbox/mcp', Path(temporary) / 'oauth', allow_login=True)
+            url = 'https://mcp.example.com/mailbox/authorize?state=TEST_STATE'
+            with patch('browser_authorization.webbrowser.open', return_value=True) as browser:
+                with patch.object(httpx2.AsyncClient, '_send_single_request', AsyncMock(side_effect=AssertionError('headless authorization request'))) as sender:
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        await bridge.transport.auth.redirect_handler(url)
+            browser.assert_called_once_with(url)
+            self.assertEqual(0, sender.await_count)
 
     async def test_default_proxy_tls_and_timeout_inputs_are_preserved(self):
         timeout = httpx2.Timeout(30, read=10)
