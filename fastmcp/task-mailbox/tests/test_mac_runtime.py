@@ -75,12 +75,80 @@ class MacRuntimeTests(unittest.TestCase):
             plist = plistlib.load(stream)
         self.assertFalse(plist['KeepAlive'])
         self.assertFalse(plist['RunAtLoad'])
+        self.assertFalse(result['start_at_login'])
+        self.assertFalse(json.loads((runtime / 'install-receipt.json').read_text())['start_at_login'])
         self.assertIn(str(runtime.resolve() / 'config.json'), plist['ProgramArguments'])
         # Reinstall keeps one owned hook and preserves the same scope/identity.
         install(runtime, self.state, 'https://mcp.example.com/mailbox/mcp',
                 [str(self.project)], hook_file, launch, 'fixed-test-commit')
         stop = json.loads(hook_file.read_text())['hooks']['Stop']
         self.assertEqual(1, len(stop))
+
+    def prepare_install_args(self):
+        runtime = self.root / 'runtime'
+        python = runtime / '.venv/bin/python'
+        python.parent.mkdir(parents=True)
+        python.write_text('not executed')
+        return (runtime, self.state, 'https://mcp.example.com/mailbox/mcp',
+                [str(self.project)], self.root / 'hooks.json',
+                self.root / 'agents/bridge.plist', 'fixed-test-commit')
+
+    def test_install_upgrade_preserves_enabled_login_start(self):
+        args = self.prepare_install_args()
+        install(*args)
+        launch = args[5]
+        plist = plistlib.loads(launch.read_bytes())
+        plist['RunAtLoad'] = True
+        launch.write_bytes(plistlib.dumps(plist))
+
+        result = install(*args)
+
+        upgraded = plistlib.loads(launch.read_bytes())
+        self.assertTrue(upgraded['RunAtLoad'])
+        self.assertFalse(upgraded['KeepAlive'])
+        self.assertTrue(result['start_at_login'])
+        receipt = json.loads((args[0] / 'install-receipt.json').read_text())
+        self.assertTrue(receipt['start_at_login'])
+        self.assertEqual('PREPARED_NOT_BOOTSTRAPPED', result['launch_agent'])
+
+    def test_install_cli_explicitly_enables_login_start_without_bootstrapping(self):
+        args = self.prepare_install_args()
+        runtime, state, endpoint, roots, hooks, launch, commit = args
+        result = subprocess.run([sys.executable, str(ROOT / 'mac/install.py'),
+            '--runtime-dir', str(runtime), '--state-dir', str(state),
+            '--endpoint', endpoint, '--allowed-root', roots[0],
+            '--hook-file', str(hooks), '--launch-agent', str(launch),
+            '--source-commit', commit, '--start-at-login'],
+            capture_output=True, text=True, timeout=5)
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertTrue(output['start_at_login'])
+        self.assertFalse(output['execution_enabled'])
+        self.assertEqual('PREPARED_NOT_BOOTSTRAPPED', output['launch_agent'])
+        plist = plistlib.loads(launch.read_bytes())
+        self.assertTrue(plist['RunAtLoad'])
+        self.assertFalse(plist['KeepAlive'])
+        self.assertTrue(json.loads((runtime / 'install-receipt.json').read_text())['start_at_login'])
+        self.assertEqual('not executed', (runtime / '.venv/bin/python').read_text())
+
+    def test_install_rejects_mismatched_existing_launch_unit_before_replacing_files(self):
+        args = self.prepare_install_args()
+        runtime, _, _, _, hooks, launch, _ = args
+        launch.parent.mkdir(parents=True)
+        existing = {'Label': 'io.taskmailbox.coordinator',
+                    'ProgramArguments': ['/another/runtime/bridge.py'],
+                    'WorkingDirectory': '/another/runtime', 'RunAtLoad': True}
+        before = plistlib.dumps(existing)
+        launch.write_bytes(before)
+
+        with self.assertRaisesRegex(ValueError, 'launch agent.*differs'):
+            install(*args)
+
+        self.assertEqual(before, launch.read_bytes())
+        self.assertFalse((runtime / 'config.json').exists())
+        self.assertFalse((runtime / 'app').exists())
+        self.assertFalse(hooks.exists())
 
 
 if __name__ == '__main__':
