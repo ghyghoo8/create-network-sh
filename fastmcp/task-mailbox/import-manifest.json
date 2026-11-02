@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "imported_on": "2026-11-02",
+  "source_repository": "https://github.com/CF-FE/task-mailbox-mcp",
+  "source_commit": "7d162860c10ac2d72719522be7fe01478f4747a3",
+  "destination_root": "fastmcp/task-mailbox",
+  "maintenance": "Independent copy; no symlinks, submodules, cross-repository runtime imports or automatic synchronization. Preserve this initial baseline.",
+  "excluded": [
+    ".git",
+    "credentials",
+    "runtime databases",
+    "OAuth state",
+    "virtual environments",
+    "logs",
+    "generated caches"
+  ],
+  "files": [
+    {
+      "source_path": ".env.example",
+      "target_path": "fastmcp/task-mailbox/.env.example",
+      "git_mode": "100644",
+      "git_blob": "7919005485d813e1dc7527fe3eb4b32e7ed6472b",
+      "bytes": 752,
+      "sha256": "83fadbc9688d00905ac4b89bd26d3b0530a89661c4d7a5e6aa9c6647105688ab"
+    },
+    {
+      "source_path": ".gitignore",
+      "target_path": "fastmcp/task-mailbox/.gitignore",
+      "git_mode": "100644",
+      "git_blob": "05572a257849d3f83c7d1827ffd117e2d2ea54b4",
+      "bytes": 184,
+      "sha256": "aa94306f614dd7875196b4741d7c73762255765389a5ca6cc0202885178e713c"
+    },
+    {
+      "source_path": "AGENTS.md",
+      "target_path": "fastmcp/task-mailbox/AGENTS.md",
+      "git_mode": "100644",
+      "git_blob": "c8444d0e9ae92ba8c85a31018a73704b721cef16",
+      "bytes": 2693,
+      "sha256": "58b2c2cd3ac1c6792c264886d70164c61e4ff0872f360f0fa86b6176b2cf44aa"
+    },
+    {
+      "source_path": "README.md",
+      "target_path": "fastmcp/task-mailbox/README.md",
+      "git_mode": "100644",
+      "git_blob": "27879770ce8a4716f9d212531e7dc4857c118688",
+      "bytes": 6346,
+      "sha256": "e476cf997f2d8fed21e52e32ce5a12df851d558c218b9b87914d5ef81e1d78a8"
+    },
+    {
+      "source_path": "SPEC.md",
+      "target_path": "fastmcp/task-mailbox/SPEC.md",
+      "git_mode": "100644",
+      "git_blob": "d40d5c088d5bab13f1213ab04c85ae6d7c98a48a",
+      "bytes": 6071,
+      "sha256": "ff50ce36edd678d95bf5e10995254eca33c2bcdbbc3b4836da7b64fe547080be"
+    },
+    {
+      "source_path": "clients/README.md",
+      "target_path": "fastmcp/task-mailbox/clients/README.md",
+      "git_mode": "100644",
+      "git_blob": "b619ec215e175b1ee7243b05bc9019e4d93b9048",
+      "bytes": 2453,
+      "sha256": "539b85c3c78260b9e7bfdcb09eeeb623ed6614dd06620297a3185aafe899952e"
+    },
+    {
+      "source_path": "clients/cloud-plugin/mcp.json.example",
+      "target_path": "fastmcp/task-mailbox/clients/cloud-plugin/mcp.json.example",
+      "git_mode": "100644",
+      "git_blob": "bf18f5e7d09a32d35eb7cf2932522d5a9d9b082e",
+      "bytes": 376,
+      "sha256": "84a177ff201181f56a829577af43058b58aaa3ebe6c2a3ad08c8b5f0ab57eb0b"
+    },
+    {
+      "source_path": "clients/cloud-plugin/plugin.json.example",
+      "target_path": "fastmcp/task-mailbox/clients/cloud-plugin/plugin.json.example",
+      "git_mode": "100644",
+      "git_blob": "ffaadcb721994f608536597ae344096486b26b8e",
+      "bytes": 679,
+      "sha256": "da408e90bd42dbabe477a3a1eb4a5847d62fdbaa662b3034bdd1540bfcaafa96"
+    },
+    {
+      "source_path": "clients/codex.config.example.toml",
+      "target_path": "fastmcp/task-mailbox/clients/codex.config.example.toml",
+      "git_mode": "100644",
+      "git_blob": "cc58039d9ddb42f01fac3b893bb747b365c8d1b1",
+      "bytes": 139,
+      "sha256": "bf3266f2b71d454a37524bee7304a440d64f3fc6a82517da993bca66435e1931"
+    },
+    {
+      "source_path": "clients/kimi.mcp.example.json",
+      "target_path": "fastmcp/task-mailbox/clients/kimi.mcp.example.json",
+      "git_mode": "100644",
+      "git_blob": "cd315f01304de4e98462a2e75733d76e598adab7",
+      "bytes": 105,
+      "sha256": "dfe284e7365f588fe129045933421e3c7768eb1cd513c1c8ae03db3c76bbcb5c"
+    },
+    {
+      "source_path": "deployment/caddy-route.example",
+      "target_path": "fastmcp/task-mailbox/deployment/caddy-route.example",
+      "git_mode": "100644",
+      "git_blob": "95e004f18e0340b968e9a831b8717bf035ff8c15",
+      "bytes": 394,
+      "sha256": "99e6dd842acb5aac6c49a8638d8199e2b58583fb34808752f2396e276c74af96"
+    },
+    {
+      "source_path": "deployment/configure-private.py",
+      "target_path": "fastmcp/task-mailbox/deployment/configure-private.py",
+      "git_mode": "100644",
+      "git_blob": "89bf6bcc05b3a2e13c5d045f6d1d7bccdfeacd91",
+      "bytes": 3620,
+      "sha256": "28c5bbaf0b6db0cf403f93f00c6dd669c4322799b9302ce2e665715e785aaaac"
+    },
+    {
+      "source_path": "deployment/prepare-host.sh",
+      "target_path": "fastmcp/task-mailbox/deployment/prepare-host.sh",
+      "git_mode": "100644",
+      "git_blob": "90f348a56faabb95e647bf7f41b485b25b7a5de2",
+      "bytes": 2083,
+      "sha256": "39524421af2e3ee57b0e37a21065400c5487a048c225f1fe49ad36e06fef39e6"
+    },
+    {
+      "source_path": "deployment/task-mailbox.service",
+      "target_path": "fastmcp/task-mailbox/deployment/task-mailbox.service",
+      "git_mode": "100644",
+      "git_blob": "77d48bfff01516669d83a2904f6d882fafa45b7f",
+      "bytes": 753,
+      "sha256": "34bc93282bd83c5fa10658f99f0b46309c9d1645dfe53b1c974fee75360ea733"
+    },
+    {
+      "source_path": "docs/deployment.md",
+      "target_path": "fastmcp/task-mailbox/docs/deployment.md",
+      "git_mode": "100644",
+      "git_blob": "bfcb4b0bf55617478361c780ce817dd3b6639699",
+      "bytes": 11774,
+      "sha256": "118c37bc563a2b2362371d20508c2ed8828458d6962a8ccbab55c5bf0fd605fd"
+    },
+    {
+      "source_path": "docs/verification.md",
+      "target_path": "fastmcp/task-mailbox/docs/verification.md",
+      "git_mode": "100644",
+      "git_blob": "4df41773d4124b25136f5aa2f08f17a198a161bd",
+      "bytes": 8093,
+      "sha256": "6c4114b3e6c76c8da2a37b33fe9f9647eeb0e5be9b2935e25b9c30ebdabac27b"
+    },
+    {
+      "source_path": "mailbox_store.py",
+      "target_path": "fastmcp/task-mailbox/mailbox_store.py",
+      "git_mode": "100644",
+      "git_blob": "cf2855863e6e2636cef33a2550d145873956bfc7",
+      "bytes": 18095,
+      "sha256": "2a18b9a57b12df0def29bcb121f2cc619b57b930eabd9d52818bf483ab4e86ed"
+    },
+    {
+      "source_path": "oauth_storage.py",
+      "target_path": "fastmcp/task-mailbox/oauth_storage.py",
+      "git_mode": "100644",
+      "git_blob": "6490e2fa2837fc6709f3e14f2b2d44775e53096e",
+      "bytes": 5454,
+      "sha256": "868de43dd455ab610685c2c620af8086ce3f54df73327a6b721add3a648e79f5"
+    },
+    {
+      "source_path": "requirements.lock.txt",
+      "target_path": "fastmcp/task-mailbox/requirements.lock.txt",
+      "git_mode": "100644",
+      "git_blob": "961eda6dd53e9cb5e48b4b02e8ae372df17dd6e8",
+      "bytes": 1349,
+      "sha256": "3f7ef69cd3b48dbbbaf2cba7d194ca5680867c46c9d1fde0277ba5fae1bfb583"
+    },
+    {
+      "source_path": "requirements.txt",
+      "target_path": "fastmcp/task-mailbox/requirements.txt",
+      "git_mode": "100644",
+      "git_blob": "d9a106ab183669dad182f438200d5d3b06f5ae4f",
+      "bytes": 114,
+      "sha256": "c9db7825e5a203478432523d967309ab3e1869728e055382693c93363a2124ab"
+    },
+    {
+      "source_path": "server.py",
+      "target_path": "fastmcp/task-mailbox/server.py",
+      "git_mode": "100644",
+      "git_blob": "cd5dd4e3afe2c546768bffe97c57601a4a7162ba",
+      "bytes": 10372,
+      "sha256": "cc4a825fc732aa8adfddcea85f8297b08de06733d1ef0dc3a3b7ab8a8d66c2b4"
+    },
+    {
+      "source_path": "tests/smoke_mcp.py",
+      "target_path": "fastmcp/task-mailbox/tests/smoke_mcp.py",
+      "git_mode": "100644",
+      "git_blob": "8b025a4abb9f0408daf676b4ccd21fd9c3c0329b",
+      "bytes": 8620,
+      "sha256": "578ea095e30a4ccf80d87bc3613308203b38b3d575942867b38805a82d06bc64"
+    },
+    {
+      "source_path": "tests/smoke_oauth_storage.py",
+      "target_path": "fastmcp/task-mailbox/tests/smoke_oauth_storage.py",
+      "git_mode": "100644",
+      "git_blob": "5025549c6753ca49ea027050614df94ab4c16bf0",
+      "bytes": 4959,
+      "sha256": "f2866d761eee29ee22c445029febe6007af217843f88cb3d98336ccbcb85f5b6"
+    },
+    {
+      "source_path": "tests/test_mailbox_store.py",
+      "target_path": "fastmcp/task-mailbox/tests/test_mailbox_store.py",
+      "git_mode": "100644",
+      "git_blob": "1fb3d76a2474cc2c8a72c37b8820b838ce9d8052",
+      "bytes": 16077,
+      "sha256": "fb46d87e562dfb9b16039c8cd060f548147fc996a8c7fd11e3c5d374fbdd6eda"
+    }
+  ]
+}

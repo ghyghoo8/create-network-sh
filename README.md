@@ -4,6 +4,9 @@
 * 方案、固定版本与来源：[Headscale 方案](./headscale/README.md)
 * 提交前脱敏结果及历史边界：[敏感信息检查记录](./headscale/fastmcp-security-review.md)
 
+* FastMCP 服务、源码与接入：[服务索引](./fastmcp/README.md)
+* Dot／本地持久任务信箱：[Task Mailbox](./fastmcp/task-mailbox/INTEGRATION.md)
+
 * 参考：https://segmentfault.com/a/1190000047723636
 
 * codex app 配置: `$HOME/.codex/.env`（仅填写在本机，不提交真实凭据）
