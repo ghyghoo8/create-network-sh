@@ -1,6 +1,6 @@
 # Task Mailbox 事件与 Codex App 钩子方案
 
-日期：2026-11-02，Asia/Shanghai。状态：**本地实现与隔离测试已完成，已独立安装；原生 hook 信任／触发、真实桥接授权和持续运行分别验收。** 本页是事件与钩子扩展的唯一当前方案；它不授予自动执行权限。当前现场与客户端状态统一见[验证记录](verification.md)。
+日期：2026-11-02，Asia/Shanghai。状态：**本地实现与隔离测试已完成，已独立安装并由公子审阅信任；真实 App 已观察三类原生 hook，Mac 桥授权未完成，持续收件未启用。** 本页是事件与钩子扩展的唯一当前方案；它不授予自动执行权限。当前现场与客户端状态统一见[验证记录](verification.md)。
 
 ## 结论与保留的主张
 
@@ -12,7 +12,7 @@ Codex App“编码 → 钩子”可以适配本地 Codex 会话的入场提示�
 
 ## 已核证据与尚未确立的范围
 
-运行代码依据目标仓 `a06dc70e7994df7cb3c92a30cfde4276c26a5759`；设计评审前的文档基线为 `c9766cb5f9029ba305706043bfbaf2449c8815fd`。代码契约位于 SPEC、MCP 函数签名和 Store 校验器；没有独立 contracts/schema 文件；Mac 客户端实现位于 [mac/](../mac/README.md)，服务器契约未变。
+VPS 运行代码依据目标仓 `a06dc70e7994df7cb3c92a30cfde4276c26a5759`；设计评审前的文档基线为 `c9766cb5f9029ba305706043bfbaf2449c8815fd`。Mac 当前安装固定版本与摘要见验证记录。代码契约位于 SPEC、MCP 函数签名和 Store 校验器；没有独立 contracts/schema 文件；Mac 客户端实现位于 [mac/](../mac/README.md)，服务器契约未变。
 
 | 证据 | 已确立含义 |
 | --- | --- |
@@ -24,7 +24,7 @@ Codex App“编码 → 钩子”可以适配本地 Codex 会话的入场提示�
 | `server.py:21-30` | 认证门是允许的 GitHub 账号；payload sender／recipient／授权文字仍是调用方数据 |
 | `server.py:193-194` | 当前采用 stateless HTTP MCP；没有服务端推送订阅／唤醒接口 |
 
-评审已核 [OpenAI 官方 Hooks 文档](https://learn.chatgpt.com/docs/hooks)及 background hooks 小节；主执行侧回读本机 `codex features list` 得到 `hooks stable true`。七类本机 hook 定义已安装，信任与实际触发以验证记录为准；功能开关和源码测试不能代替原生运行验收。
+评审已核 [OpenAI 官方 Hooks 文档](https://learn.chatgpt.com/docs/hooks)及 background hooks 小节；本机回读 `hooks stable true`，未自定义 `CODEX_HOME`，有效定义位于 `~/.codex/hooks.json`。公子已审阅信任七类定义；主执行侧直接回读 live 台账，确认当前 session 对应本对话，已观察 PreToolUse／PostToolUse／UserPromptSubmit。计数持续增长，本页不固定数字；其余四类及 CLI 模型 turn 的原生触发未据此通过。
 
 服务启动、HTTPS、客户端配置与原生 hook 支持分别取证，均不自动证明该客户端的认证、工具发现或业务执行。
 
@@ -34,7 +34,7 @@ Codex App“编码 → 钩子”可以适配本地 Codex 会话的入场提示�
 | --- | --- | --- |
 | ADOPT | 复用现有全局 events，Mac 出站连接，本机持久 inbox／cursor／dispatch 关联 | 增量查询和事件 ID 已存在，无需增加 VPS 回调入口 |
 | ADOPT | 每个消费目的有稳定 consumer_id；单个 Mac 收件器串行入库；游标和收件页同事务 | 防止请求成功但本机尚未落盘时跳过事件 |
-| ADOPT | Codex 本地 hook 只作生命周期适配；默认 advisory，无任务绑定时 no-op | 利用原生事件，不再造第二个执行管理框架 |
+| ADOPT | Codex 本地 hook 只作生命周期适配；默认 advisory，未绑定时仅感知，不生成业务回报 | 利用原生事件，不再造第二个执行管理框架 |
 | ADOPT | 首轮只通知及保存回报；handler 默认关闭 | 收到数据不等于取得执行许可 |
 | DELETE | “recipient=Dot 可收到 Dot→Mac 任务的结果”假设 | 当前 SQL 按原任务收件者过滤，结果不会改投 Dot |
 | DELETE | 不同 recipient 或消费者共用一个高水位 | 过滤视图和消费进度不同，会静默跳过另一侧旧事件 |
@@ -54,9 +54,9 @@ Codex App“编码 → 钩子”可以适配本地 Codex 会话的入场提示�
 
 | 原生事件 | 建议动作 | 明确禁止的推论 |
 | --- | --- | --- |
-| `SessionStart`／`UserPromptSubmit` | 查询本机 inbox，给出当前 session 已绑定 job 的最小 ID／摘要提示 | 不据此发起新执行；不把 mailbox content 原文提升为 developer 指令 |
+| `SessionStart`／`UserPromptSubmit` | 查询本机 inbox，给出可信计数；已绑定时附最小 job ID／hash | 不据此发起新执行；不把 mailbox content 原文提升为 developer 指令 |
 | `Stop` | 仅对已绑定 job 的 session／turn 保存结构化本地回报 spool；正常返回 `{}` | 不把 Stop 自动写成 REPORTED_COMPLETED；不直接上传末条回复或整段 transcript |
-| `PostToolUse` | 仅匹配必要的已绑定工具，补本地调用引用／已发生效果记录 | 不默认监听一切工具，不因报告上传触发自身无限链路 |
+| `PreToolUse`／`PostToolUse` | 仅匹配 Bash、apply_patch 与 task-mailbox MCP，保存本地调用引用和最近观察 | 不保存 tool_input／tool_response，不默认监听所有工具，不因回报上传生成业务执行 |
 | `Interrupt` | 记录中断请求及最后已知执行引用 | 不等于原执行已 STOPPED，也不自动续轮 |
 | `SessionEnd` | 可做短时本地保存；不能作为唯一交付动作 | 不依赖此时的远端 MCP 调用或长时上传 |
 
@@ -66,7 +66,7 @@ Stop 返回 blocking decision 会以 reason 自动建立续轮提示，不能作
 
 additionalContext 在 Codex 中具有较高上下文权重。只放可信固定提示和 job／event／hash 这些最小关联，不直接嵌入未经验证的任务正文、外链内容或控制命令。真正任务内容仍经受控工具按数据读取与授权校验。
 
-云端 Work／Dot 的 hooks 是另一条产品边界：官方仅在相关企业 managed policy、remote hooks 和 local access 条件成立时支持管理员配置的远端 MCP hooks；personal 以及普通本地／插件／command hook 不能据此获得云编排能力。当前 Dot 是否符合条件为 UNKNOWN，不替换为“装了本地 hook 就能推醒 Dot”。[官方说明](https://learn.chatgpt.com/docs/hooks#managed-hooks-from-requirements-toml)
+云端 Work／Dot 的 hooks 是另一条产品边界：enterprise managed policy 与 remote hooks 启用时，Work Cloud with local access／Dot 可由管理员在 Global `requirements.toml` 配置远端 `mcp_tool` hooks。personal accounts 和无 local access 的 Work Cloud 不使用这些企业 hooks；本地 command／插件／目录 hook 不支持云编排。当前 Dot 的企业 hook 条件仍 UNKNOWN；其 whoami／usage 成功仅证明对应只读调用，不证明 hook 权限或自动唤醒。[官方企业边界](https://learn.chatgpt.com/docs/enterprise/agent-security#hooks-in-local-computer-access-with-work-cloud)、[Hooks 说明](https://learn.chatgpt.com/docs/hooks#managed-hooks-from-requirements-toml)
 
 ## 收件、cursor 与分页的最小正确用法
 
@@ -100,7 +100,7 @@ additionalContext 在 Codex 中具有较高上下文权重。只放可信固定�
 | inbox | event_id、cursor、job_id、event_type、规范化事件摘要／原始小事件、接收时间、处理状态／原因 |
 | dispatch／report | 稳定 action_id、job_id、触发 event_id、受控 handler／policy 版本、准确 native target、当前阶段、原生请求引用、取消请求位、回报版本／hash 和补传状态 |
 
-通知阶段只需 `PENDING → HANDLED`，拒绝／未知类型分别留 `IGNORED`／`HELD`。执行阶段再加 `READY → HANDOFF_INTENT → RECEIPT`，以及 `UNKNOWN`、`NOT_STARTED_CANCELLED`；RECEIPT 仅表示取得明确受理回执，业务结果另存。取消是独立请求位，不能覆盖实际运行事实。
+当前实现保存 PENDING／HANDLED／HELD 的收件状态、显式绑定、会话观察与待发回报，不包含业务执行阶段。后续若另行采用执行 handler，才增加 `READY → HANDOFF_INTENT → RECEIPT`、`UNKNOWN`、`NOT_STARTED_CANCELLED`；RECEIPT 只表示明确受理，业务结果另存。取消是独立请求位，不能覆盖实际运行事实。
 
 | 崩溃位置 | 恢复规则 |
 | --- | --- |
@@ -140,7 +140,7 @@ HANDOFF_INTENT 必须在外部动作前持久保存，然后释放事务，再�
 | 空闲查询 | 每 30 秒一次，单 collector 不重叠轮次；15 分钟约 30 次 list_events 调用 |
 | 页预算 | limit=25，每轮最多 4 页；有积压延后续读，不启动无限 drain |
 | 请求／轮次 | 单调用超时 10 秒、每轮总时间上限 20 秒；总 RPC 上限 10 次，handler 并发为 1 |
-| 错误退避 | 网络错误退避 60→120→300 秒；尊重明确 Retry-After；401／403 停受影响分支，不自动登录或换认证 |
+| 错误退避 | 网络错误退避 60→120→300 秒；401／403 停受影响分支，不自动登录或换认证 |
 | 本地数据 | 先只持久小事件与引用；候选数据库 32 MiB、待处理上限 500；满额停止拉取／准入并保全旧记录，不自动删除 |
 | 新增业务效果 | 原型为 0 个模型回合、0 次 shell／Herdr 派发；纯通知的有限重试单独计数 |
 
@@ -156,11 +156,11 @@ SQLite 空间不足或本机不能持久记录时，不再产生新业务效果�
 | --- | --- | --- |
 | R0：评审与契约说明 | PASS | 公子明确授权推进，已按原方案实现；VPS MCP 契约不变 |
 | R1：离线收件原型 | PASS | 台账 20 项与 collector 17 项行为测试；原子水位、重传、重启、满库回滚、未知事件与认证失败停分支 |
-| R2：本机感知与原生 hook | PARTIAL | 10 项 hook 与 3 项 CLI／安装测试通过，真实 Mac 代码／配置已安装；精确定义的原生 trust 和实际触发仍独立回读 |
-| R3：真实 MCP 只读／回报 | NOT_RUN | OAuth 可用后，在限定窗口真实读原日志并核版本／hash；通知失败不改变 submit 成功；断线补传保留 event_id；不调用模型／业务 |
+| R2：本机感知与原生 hook | PARTIAL | 10 项 hook 与 3 项 CLI／安装测试通过；已安装并完成 trust，真实 App 台账观察到 PreToolUse／PostToolUse／UserPromptSubmit。其余原生事件与 CLI 模型触发分别未验 |
+| R3：Mac 桥真实收件／回报 | NOT_RUN | 桥 OAuth 可用后，在限定窗口真实读原日志并核版本／hash；通知失败不改变 submit 成功；断线补传保留 event_id；不调用模型／业务 |
 | R4：受控执行 handler | DEFER | 明确项目、owner、target、操作／预算／取消契约；隔离 nonce；回执丢失只 UNKNOWN 对账；另获故障注入授权后测崩溃窗口 |
 | R5：长期及多消费者 | DEFER | 真实额度、睡眠恢复、容量、log 重建／stream identity、接管 fencing 和长期观测均有证据后再决定 |
 
 OAuth／原生 HTTP 发送故障与钩子能力分开，沿原客户端、App 和回调定位；云端连接回报、工具发现及 nonce 状态统一见[当前验证记录](verification.md)。不通过 hook 绕过认证，不把该故障解释为 Herdr／模型失败。离线契约整理可以继续，真实 MCP 阶段等待相应客户端的认证与身份回读。
 
-当前实现的感知范围是公子选定的 Herdr 与信箱项目：新事件、取消、结果／UNKNOWN、待回传、最近会话信号和连接健康。项目路由元数据标为调用方数据，不提升为执行权。下一步沿原生 trust、专用桥 OAuth 与数据 nonce 验证推进；自动派发、Herdr／模型 handler、故障注入及多 Mac 抢占仍未开启。源码与操作见 [Mac 指引](../mac/README.md)，现场状态只写验证记录。
+当前实现的感知范围是公子选定的 Herdr 与信箱项目：新事件、取消、结果／UNKNOWN、待回传、最近会话信号和连接健康。项目路由元数据标为调用方数据，不提升为执行权。原生 trust 与三类 App 触发已有证据；下一依赖仍是专用桥完整 OAuth，再沿原 PERSISTED nonce 验证收件／回传，不重发。第二次受控登录及无凭据诊断出现不一致传输结果，不能认定用户拒绝或改动认证来绕过；细分根因见验证记录。自动派发、Herdr／模型 handler、故障注入及多 Mac 抢占仍未开启。源码与操作见 [Mac 指引](../mac/README.md)，现场状态只写验证记录。

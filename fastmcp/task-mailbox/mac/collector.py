@@ -257,6 +257,8 @@ async def create_client(endpoint, state_directory, *, allow_login=False):
     # Lazy imports keep missing-cache checks and fake tests stdlib-only.
     from cryptography.fernet import Fernet
     from fastmcp import Client
+    from fastmcp.client.transports import StreamableHttpTransport
+    from metadata_transport import metadata_client_factory
     from fastmcp.client.auth import OAuth
     from fastmcp.client.auth.oauth import TokenStorageAdapter
     from key_value.aio.stores.filetree import (FileTreeStore,
@@ -370,4 +372,6 @@ async def create_client(endpoint, state_directory, *, allow_login=False):
 
     oauth = BridgeOAuth(mcp_url=endpoint, token_storage=storage,
                         client_name="Task Mailbox Mac Bridge", callback_host="127.0.0.1")
-    return Client(endpoint, auth=oauth, timeout=10, init_timeout=300 if allow_login else 10)
+    transport = StreamableHttpTransport(endpoint, auth=oauth,
+        httpx_client_factory=metadata_client_factory(endpoint))
+    return Client(transport, timeout=10, init_timeout=300 if allow_login else 10)

@@ -15,25 +15,28 @@
 | VPS 独立环境与源码 | PASS | 24 个初始来源摘要核对；独立 venv 125212 KiB，锁定依赖与专用单元已安装 |
 | VPS 常驻新信箱进程 | PASS | 单元 active/running，NRestarts=0，回环受保护端点返回 401；只证明进程层 |
 | 共享 HTTPS 路由与发现 | PASS | 两类 OAuth discovery 为 200 且 issuer/resource 精确匹配，MCP 未认证 POST 为 401；Caddy 校验成功、原主进程保持，旧 Gitee 路径仍为受保护 401 |
-| 生产 OAuth 完整流程 | PARTIAL | 独立 App 配置存在，Mac 首次原生流程收到回调；令牌交换失败，尚无允许主体的受保护工具回读 |
+| 生产 OAuth 跨客户端覆盖 | PARTIAL | 云端 App 已有允许主体的只读工具回执；本地 Codex 首次交换失败，Mac 桥专用缓存仍不完整，不能把一端成功推广到各客户端 |
 | 旧 portable 插件 | PARTIAL | 初次包元数据上传通过，但界面显示“仅限桌面端”；公子已卸载，不再作为当前入口；未由主执行侧验证后台永久删除 |
 | 新 Task Mailbox App 连接 | PASS | 公子通过原生自定义 MCP 流程创建；主执行侧回读 USER／PRIVATE、1.0.0 及原生 App 绑定，未重造服务器或复制凭据 |
 | 当前桌面会话经云端 App 调用 | PASS | 9 工具已实际出现，原生 whoami／mailbox_usage 调用均成功，执行开关为 false；调用者为当前桌面会话，不冒称指定 Dot 已读 |
-| 指定 Dot 原生回读 | NOT_RUN | 等待该 Dot 的实际调用／读确认；不由注册或另一会话调用推定 |
+| 指定 Dot 只读回读（用户回报） | PASS | 公子明确转述指定云端 Dot 的 whoami／mailbox_usage 均成功；这是用户回报的 Dot 实测，不是主执行侧直接以 Dot 身份调用，也不代表原 nonce 已读取 |
 | Mac Codex 配置 | PASS | 原生命令登记，回读 enabled=true、Streamable HTTP 及正确端点；不推定当前 App 会话已加载 |
 | Mac Codex OAuth | FAIL | CLI 0.166.0-alpha.5.1 本地 callback 后 token exchange 报 Request failed；原因仍未定位，未自动重登或改变认证方式 |
 | Mac Kimi 配置 | PASS | 委托执行侧原子写入 Kimi Code 2.4.1 用户级 MCP 文件、保留既有条目；主执行侧另行直接回读端点匹配与权限 0600 |
 | Mac Kimi OAuth／工具发现 | NOT_RUN | 未启动 Kimi 新会话、登录或发现 |
-| 双向 nonce 数据闭环 | PARTIAL | 新 App 已持久接收一个数据验证 job；Mac 桥授权未完成、尚未本地收件／回传，指定 Dot 读取未验；保留原 ID 续测 |
+| 双向 nonce 数据闭环 | PARTIAL | 原数据验证 job 仍为 PERSISTED；Mac 桥尚未取回／回传，指定 Dot 对原 job／结果的读取未验；保留原 job／hash／事件引用，不重发 |
 | Mac 本地实现与测试 | PASS | 完整 67 项测试：原 Store 17、台账 20、collector 17、hook 10、CLI／安装 3；主执行侧在独立 Mac 环境再次执行通过 |
 | Mac 桥独立安装 | PASS | 独立源码副本、摘要回读、0700 运行目录、0600 配置／钩子定义、实际 SQLite 状态回读及 plist lint；没有启动模型／Herdr／业务 handler |
 | Mac 桥依赖与加密客户端初始化 | PASS | Python 3.13.1 x86_64，FastMCP 4.0.11、MCP 2.3.0、cryptography 48.0.1，共 66 依赖；临时目录中实际构造客户端、私密权限与缺缓存拒绝测试通过，无外部请求 |
-| Codex App 原生钩子触发 | PARTIAL | 七类定义已安装，仅覆盖 Herdr／信箱项目，等待精确版本 review/trust；本机尚未观察到原生 session／hook 事件，不能把模拟子进程称作 App 已触发 |
-| Mac 桥 OAuth／网络收件 | PARTIAL | 专用原生登录打开 Application Access Request；本次返回 RuntimeError，SDK 缓存尚不完整、worker 检查为 AuthRequired。没有自动重登，具体原因 UNKNOWN |
+| Codex App 原生钩子触发（已观察三类） | PASS | 公子已审阅并信任已安装定义；主执行侧直接回读本地 live 台账，session 与本对话对应，观察到 PreToolUse／PostToolUse／UserPromptSubmit。只覆盖实际观察的三类，不推定其余四类或 CLI 模型回合已触发 |
+| Mac 桥专用 OAuth | PARTIAL | 首次专用登录后缓存不完整；公子授权的第二次受控登录未出现新授权 URL，异常类型链含 RuntimeError／RemoteProtocolError，worker 仍为 AuthRequired。未写原始异常 str／args，原因细分 UNKNOWN |
+| Mac 桥真实网络收件／回传 | NOT_RUN | 专用授权未取得完整成功回执；原 nonce 未被 Mac 取回，不重建或重发替代 job |
 | Mac 持续收件进程 | NOT_RUN | launchd 单元已准备，RunAtLoad=false／KeepAlive=false，未 bootstrap／kickstart；先授权和短窗口数据验证 |
 | Herdr／模型／业务执行 | NOT_RUN | 信箱没有执行能力；进程、HTTP 或数据闭环均不代替业务验收 |
 
-当前运行时为 Python 3.14.4、FastMCP 4.0.11、MCP 2.3.0、uvicorn 0.54.0。真实端点、账号、插件 ID、原始输出及认证状态留在私密落点，公开文档只用别名。
+VPS 当前运行时为 Python 3.14.4、FastMCP 4.0.11、MCP 2.3.0、uvicorn 0.54.0。真实端点、账号、插件 ID、原始输出及认证状态留在私密落点，公开文档只用别名。
+
+本机 CLI 回读 `hooks stable true`，未自定义 `CODEX_HOME`，有效用户 hook 文件为 `~/.codex/hooks.json`。同一 Codex host 的 App／CLI 使用这套配置；本次真实事件来自当前 App 会话，没有运行 CLI 模型 turn，因此配置共享不能代替 CLI 原生触发验收。台账保存的是最近观察与时点，不证明原生进程持续在线或业务完成。
 
 ## 现场资源与排障边界
 
@@ -46,6 +49,10 @@ Mac 登录使用客户端原生 CIMD、PKCE S256 和 read:user；临时 loopback
 不带真实 code／token 的 Mac token POST 探针返回标准 JSON 401；HTTP/1.1 与 HTTP/2 两种 curl 请求均完成。它们只证明相应探针经过入口，不代表 Codex 的 Rust HTTP 栈、实际授权码交换或云端连接。当前未读取客户端令牌缓存、未重放授权码、未开启可能记录 code／token 的认证 DEBUG 日志。
 
 委托只读诊断在同一 Mac 使用 Codex 0.166.0-alpha.5.1 的 exec-server stdio 发送一次无凭据 dummy POST，2.767 秒返回 HTTP 发送错误，未取得状态码；OAuth／模型调用和配置变化均为 0，主执行侧回读了受限诊断产物。它复现了独立于 OAuth 业务的原生发送失败；该探针与 MCP 登录的 TLS fallback 标记不同，不能当作完整等价流程。具体 TLS／代理／路由原因仍 UNKNOWN，未据此切换配置。
+
+Mac 桥的第二次受控登录只记录异常类型链，不记录可能含凭据的异常 str／args。另用 httpx2 做无凭据诊断：一次 issuer GET 在 2.233 秒、响应头到达前出现 RemoteProtocolError，同次 MCP POST 得到 401；随后以同一默认参数和同一发现 URL 再做一次 GET，5.043 秒得到 200，issuer 与 token endpoint 前缀正确。这些结果支持偶发传输故障的判断，未构成 OAuth 拒绝证据，也没有确定具体 TLS／代理／路由根因。没有改变代理、TLS 或端点，不能将诊断样本当作登录成功。
+
+针对上述已复现的响应头前中断，新增仅同源两类 well-known 元数据 GET 的一次窄重试，固定 httpx2 2.16.0；两次请求共用 10 秒，不替换底层代理／TLS、不跟随重定向，也不在 HTTP 层重发任何 POST。主执行侧运行 67 项标准库回归及 8 项专用依赖假传输测试均通过，后者含实际 OAuth／MCP 共用工厂的离线接合；真实登录恢复仍须另验，不以这些本地测试提升授权状态。
 
 ## 本地 Store 验证
 
@@ -82,7 +89,9 @@ systemd 模板的 `MemoryHigh=192M`、`MemoryMax=256M`、`CPUQuota=50%`、`Tasks
 
 明确区分 systemd `active`、HTTP 返回、MCP 初始化、工具清单和工具调用；其中一项通过不能填补其他项。用户完成 OAuth 登录前，受保护工具调用保留 `NOT_RUN`；明确认证拒绝记对应分支 `FAIL`，不静默降为无认证。
 
-独立 GitHub OAuth App 的私密配置已由公子完成，不再作为缺失项。旧 portable 包已由公子卸载；新原生 App 连接的工具清单、whoami／usage 已由当前会话直接取得。Mac 桥使用自己专用的加密 OAuth 状态，既不读取旧 Codex／Kimi 缓存，也不绕过服务器认证。下一依赖是 Mac 原生授权完整回执与 hook trust，再沿原数据验证任务继续，不重建替代任务。
+独立 GitHub OAuth App 的私密配置和本地 hook trust 已由公子完成，不再作为缺失项。旧 portable 包已由公子卸载；新原生 App 的工具清单、whoami／usage 已由当前会话直接取得，指定 Dot 的两项只读成功另按用户回报记录。Mac 桥使用专用加密 OAuth 状态，不读取旧 Codex／Kimi 缓存或绕过认证；下一依赖仍是该桥的完整授权回执，再沿原 nonce 继续，不重建替代任务。
+
+云端只读工具成功与云端 hook 能力分开。[官方企业边界](https://learn.chatgpt.com/docs/enterprise/agent-security#hooks-in-local-computer-access-with-work-cloud)规定：相关 enterprise managed policy 和 remote hooks 启用时，Work Cloud with local access／Dot 可使用 Global `requirements.toml` 中的管理员远程 `mcp_tool` hooks；personal accounts 和无 local access 的 Work Cloud 不适用这些企业 hooks。本地 command／插件 hook 不支持云编排；当前 Dot 的企业 hook 条件未验，不承诺自动唤醒。
 
 ## 双向 nonce 验证
 
@@ -110,6 +119,6 @@ systemd 模板的 `MemoryHigh=192M`、`MemoryMax=256M`、`CPUQuota=50%`、`Tasks
 
 依赖安装曾遇旧内网额外索引超时、PyPI 下载超时及 Linux cryptography 清单不适用于本机 Intel 二进制的问题。最终保留主框架固定版本，按 Mac 平台二进制解析并单独锁定；未更改全局源、既有客户端或系统 Rust。66 包清单见 [Mac 锁定文件](../mac/requirements.lock.macos-py313.txt)。
 
-当前已通过新 App 原生工具持久提交一个明确标记“仅数据验证”的 nonce 任务，状态为 PERSISTED。私密续测记录保留原 job／payload hash／事件 ID；Mac 尚未取得完整授权，未读取、未回传，不重新投递，也不将其记为 Herdr／Agent 任务。真实两端数据闭环仅到 App 持久接收水位，保留 PARTIAL。Mac 首次登录没有取得成功回执，不能仅凭 RuntimeError 断言用户拒绝或 token endpoint 配置错误。
+当前已通过新 App 原生工具持久提交一个明确标记“仅数据验证”的 nonce 任务，状态仍为 PERSISTED。私密续测记录保留原 job／payload hash／事件 ID；Mac 尚未取得完整授权，未读取、未回传，不重新投递，也不将其记为 Herdr／Agent 任务。指定 Dot 的 whoami／usage 成功回报不替代原 nonce 读回，真实两端数据闭环保留 PARTIAL。两次受控登录均未取得完整成功回执，不能仅凭异常类型断言用户拒绝或 token endpoint 配置错误。
 
-上线／清理状态：旧包卸载归公子回报；新 App 原生元数据与工具调用归主执行侧；Mac 模拟子进程／fake transport 是本地测试，原生 hook 触发、真实 Dot、Mac OAuth、后台在线和业务验收逐项保留未决。没有执行现场断网／崩溃注入、业务清理或任意自动派发。
+上线／清理状态：旧包卸载及指定 Dot 两项只读成功归公子回报；新 App 原生元数据／当前会话调用及三类 App hook 台账回读归主执行侧。Mac 模拟子进程／fake transport 仍只作本地测试；其余原生事件、CLI 模型触发、Mac 桥 OAuth、后台在线、nonce 与业务验收逐项未决。没有执行现场断网／崩溃注入、业务清理或任意自动派发。
