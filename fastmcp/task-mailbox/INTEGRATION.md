@@ -1,13 +1,13 @@
 # Task Mailbox 在本仓的接入
 
-本目录按公子要求纳入当前 MCP 服务，包含源码、测试、依赖锁、部署脚本、文档和云端／本地客户端配置模板，可从本目录独立工作，不依赖另一份本地 checkout。
+本目录仅保留截至 `create-network-sh@9d36feb436264f2c0a065be7e644043a930a98dd` 的历史部署副本与接收记录。**唯一维护仓为 [CF-FE/task-mailbox-mcp](https://github.com/CF-FE/task-mailbox-mcp)**；后续功能、修复、发布与安装指引沿该仓，当前真实状态只查[主维护仓验证记录](https://github.com/CF-FE/task-mailbox-mcp/blob/main/docs/verification.md)。下文“本次／当前验证”等措辞保留当时历史语境，不在本副本维护第二份当前状态。
 
 ## 固定来源与维护
 
 - 首次来源：[CF-FE/task-mailbox-mcp](https://github.com/CF-FE/task-mailbox-mcp)，固定提交 `7d162860c10ac2d72719522be7fe01478f4747a3`。
 - 24 个源文件按原相对路径、字节及 Git mode 复制；[import-manifest.json](import-manifest.json)记录大小、SHA-256 和 Git blob。
 - `INTEGRATION.md` 和来源清单是本仓接收记录，不属于源提交的 24 文件。
-- 本目录独立维护；首次来源记录保留。后续同步须显式记录版本和增量，不建立软链接、子模块、跨仓运行导入、共享虚拟环境或自动同步。
+- 本目录不再作为后续功能或修复的维护落点；首次来源、导入 hash 和下方历史增量保留，不同步服务源码，不建立软链接、子模块、跨仓运行导入或共享虚拟环境。
 - 原独立仓库保留初始化来源；本次没有删除仓库或迁移实际运行数据。
 
 ```text
@@ -27,7 +27,7 @@ Next action: copy and verify the closed source set, then index it in this repo.
 | 位置 | 归属 |
 | --- | --- |
 | `fastmcp/gitee/` | 原 Gitee 参考资料，保留自己的认证和部署逻辑 |
-| `fastmcp/task-mailbox/` | 本信箱服务的可部署源码与模板 |
+| `fastmcp/task-mailbox/` | 旧部署代码、模板与固定来源；当前维护归 `CF-FE/task-mailbox-mcp` |
 | 既有 ngrok → Caddy `127.0.0.1:19080` | 可复用公网传输入口，不替代应用认证 |
 | 原 Gitee `127.0.0.1:8765` | 保留原路径、OAuth 和运行进程 |
 | 信箱 `127.0.0.1:8766` | 新服务独立进程、虚拟环境和私密状态 |

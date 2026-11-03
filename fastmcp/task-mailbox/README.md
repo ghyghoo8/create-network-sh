@@ -1,5 +1,7 @@
 # task-mailbox-mcp
 
+本目录是截至 `create-network-sh@9d36feb436264f2c0a065be7e644043a930a98dd` 的**历史部署副本**。唯一维护仓为 [CF-FE/task-mailbox-mcp](https://github.com/CF-FE/task-mailbox-mcp)，后续源码、功能、修复和安装指引均沿该仓；当前运行状态只查[主维护仓验证记录](https://github.com/CF-FE/task-mailbox-mcp/blob/main/docs/verification.md)。本地[接收记录](INTEGRATION.md)和导入清单保留固定来源，下文功能、部署与验证说明按旧时点保存，不自动同步或作为新维护入口。
+
 部署在 VPS 的持久任务信箱 MCP，供云端 Dot 与 Mac 上的 Codex／Kimi 客户端通过同一个 OAuth HTTPS 端点收发任务和小结果。任务、结果版本与事件存入 VPS 本地 SQLite；请求超时后可以按原 `job_id` 查询，重复传输沿稳定 ID 去重。
 
 ```text
@@ -33,7 +35,7 @@ OAuth 持久值由 `oauth_storage.py` 使用 Fernet 加密，密钥由本服务�
 
 结果状态仅允许 `REPORTED_COMPLETED`、`REPORTED_FAILED`、`UNKNOWN`，表示调用方报告。服务不据此证明模型成功、业务完成或 Herdr 已执行。断线或超时先查原任务，不创建替代执行。
 
-## 开发与部署
+## 历史开发与部署
 
 Store 测试只需 Python 3.10+ 标准库，在仓库根执行：
 
@@ -52,7 +54,7 @@ python3 -m venv .venv
 
 MCP 测试使用临时回环端点和测试身份；OAuth 存储测试使用临时目录，均不能证明生产 OAuth。服务入口为 `server.py`；配置模板见 [.env.example](.env.example)、[systemd 单元](deployment/task-mailbox.service)和 [HTTPS 路由示例](deployment/caddy-route.example)。[宿主准备脚本](deployment/prepare-host.sh)只准备账户、独立环境与单元，不启动或公开服务；[客户端指引](clients/README.md)覆盖云端、Codex 与 Kimi。模板中的路径、域名和账户都是示意值，部署前按目标宿主核实。
 
-VPS 运行时为 Python 3.14.4、FastMCP 4.0.11、MCP 2.3.0、uvicorn 0.54.0。本轮信箱已独立启动于回环 `8766`，通过共享 HTTPS 入口的 `/mailbox/` 路由；原 Gitee 回环 `8765` 保留。进程、路由、OAuth、各客户端与双向读取分别记录，当前状态见 [验证记录](docs/verification.md)。
+VPS 运行时为 Python 3.14.4、FastMCP 4.0.11、MCP 2.3.0、uvicorn 0.54.0。本轮信箱已独立启动于回环 `8766`，通过共享 HTTPS 入口的 `/mailbox/` 路由；原 Gitee 回环 `8765` 保留。进程、路由、OAuth、各客户端与双向读取分别记录，该时点状态见[历史验证记录](docs/verification.md)。
 
 systemd 模板设置 `MemoryHigh=192M`、`MemoryMax=256M`、`CPUQuota=50%`、`TasksMax=32`、`LimitNOFILE=256`，作为保护上限；生产占用、响应时间及长期容量尚未验证。
 
@@ -60,12 +62,12 @@ systemd 模板设置 `MemoryHigh=192M`、`MemoryMax=256M`、`CPUQuota=50%`、`Ta
 
 目标 Linux／Python 3.14.4 环境的完整依赖见 [requirements.lock.txt](requirements.lock.txt)。宿主准备脚本按锁定文件安装并禁用 pip 缓存；其他开发平台须另核兼容性。
 
-## 当前验证
+## 历史验证
 
 Store 的 17 项标准库行为测试已通过；扩大默认值前，VPS 临时回环 MCP 的 9 工具／两个模拟客户端／账号拒绝／OAuth 元数据验证已通过。当前约 240 KiB UTF-8 传输重跑发生 SSH／观察超时，未取得完整回执，保留 UNKNOWN。新独立环境的该测试进程峰值 RSS 为 121444 KiB（约 118.6 MiB）；不是生产容量结论。VPS 独立新虚拟环境已创建，占用 125212 KiB（约 122.3 MiB），主执行侧已在此独立环境复跑 MCP 与 OAuth 存储测试，均通过。
 
-VPS 进程与 HTTPS 已实测。初次独立包被界面标记为“仅限桌面端”，公子已卸载；现改用公子在 ChatGPT 原生注册的 App 连接作为唯一 Task Mailbox 入口。当前桌面会话已发现该云端连接的九项工具，并直接调用 whoami／mailbox_usage 成功；指定 Dot 的只读成功归公子回报；Mac 桥授权、原 nonce 收件回传与当前会话经云端 App 的结果读取已实测，指定 Dot 的结果读取归公子回报且服务精确 ACK 已回读，反方向与业务验收仍分别取证。Mac Codex 原有直接 OAuth 失败与新 App 连接不是同一分支；真实状态见唯一入口 [docs/verification.md](docs/verification.md)。
+VPS 进程与 HTTPS 已实测。初次独立包被界面标记为“仅限桌面端”，公子已卸载；现改用公子在 ChatGPT 原生注册的 App 连接作为唯一 Task Mailbox 入口。当前桌面会话已发现该云端连接的九项工具，并直接调用 whoami／mailbox_usage 成功；指定 Dot 的只读成功归公子回报；Mac 桥授权、原 nonce 收件回传与当前会话经云端 App 的结果读取已实测，指定 Dot 的结果读取归公子回报且服务精确 ACK 已回读，反方向与业务验收仍分别取证。Mac Codex 原有直接 OAuth 失败与新 App 连接不是同一分支；该时点证据见本地[历史验证记录](docs/verification.md)；当前状态以主维护仓为准。
 
-[Mac 适配实现](mac/README.md)已完成并独立安装：台账、collector、钩子、CLI 与安装器共通过 104 项本地测试（含原服务 17 项）。七类钩子定义已写入，原生信任与实际触发、收件桥授权及长期运行分别验收；当前状态统一见验证记录。[事件与钩子方案](docs/hooks.md)保留完整边界，不授予自动执行权限。
+[Mac 适配实现](mac/README.md)已完成并独立安装：台账、collector、钩子、CLI 与安装器共通过 104 项本地测试（含原服务 17 项）。七类钩子定义已写入，原生信任与实际触发、收件桥授权及长期运行分别验收；该时点证据保留在本副本验证记录。[事件与钩子方案](docs/hooks.md)保留完整边界，不授予自动执行权限。
 
 本仓库公开。只提交源码、依赖声明、文档及占位配置；令牌、私钥、OAuth 密钥／状态、数据库、真实连接配置和原始宿主输出保存在各自受限运行目录。
