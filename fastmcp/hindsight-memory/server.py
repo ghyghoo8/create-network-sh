@@ -14,10 +14,16 @@ from fastmcp.server.auth.providers.github import GitHubProvider
 from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import get_access_token
 from fastmcp.tools import Tool, ToolResult
-from mcp.types import ToolAnnotations
+from mcp.types import CallToolResult, ToolAnnotations
 from starlette.responses import JSONResponse
 
 from adapter import API_TOOLS, Gateway, MAX_MESSAGE, SSHTransport
+
+
+def tool_result(value):
+    native = CallToolResult.model_validate(value)
+    return ToolResult(content=native.content, structured_content=native.structuredContent,
+                      meta=native.meta, is_error=native.isError)
 
 
 def build_app(config, secret):
@@ -79,9 +85,7 @@ def build_app(config, secret):
                 result = await invoke(get_access_token(), self.name, arguments)
             except (ValueError, PermissionError) as error:
                 raise ToolError(str(error)) from None
-            return ToolResult(content=result.get('content', []),
-                              structured_content=result.get('structuredContent'),
-                              meta=result.get('_meta'), is_error=result.get('isError', False))
+            return tool_result(result)
 
     for item in catalog['tools']:
         schema = deepcopy(item['inputSchema'])
