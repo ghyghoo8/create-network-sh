@@ -22,8 +22,8 @@ from adapter import API_TOOLS, Gateway, MAX_MESSAGE, SSHTransport
 
 def tool_result(value):
     native = CallToolResult.model_validate(value)
-    return ToolResult(content=native.content, structured_content=native.structuredContent,
-                      meta=native.meta, is_error=native.isError)
+    return ToolResult(content=native.content, structured_content=native.structured_content,
+                      meta=native.meta, is_error=native.is_error)
 
 
 def build_app(config, secret):
