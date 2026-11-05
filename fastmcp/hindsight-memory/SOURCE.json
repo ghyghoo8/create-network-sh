@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "version": "1.0.0",
+  "implementation_owner": "ghyghoo8/create-network-sh",
+  "task_ref": "https://github.com/CF-FE/herdr-4-codexcloud/issues/13",
+  "m1_contract": {
+    "repository": "CF-FE/herdr-4-codexcloud",
+    "path": "mcp/hindsight-memory/CONTRACT.md",
+    "version": "1.0.0",
+    "sha256": "95fa9831b55c409edb980914c0ff3b9e4c4d5eb85ae94529470f5c4c2b2daa1b"
+  },
+  "catalog": {
+    "origin": "Actual Win MCP tools/list via authorized VPS SSH",
+    "mcp_protocol": "2025-03-26",
+    "win_fastmcp_version": "4.1.6",
+    "hindsight_version": "1.2.0",
+    "tools": 39,
+    "sha256": "4362bd00531280c01ccfd8521c0df50797faf26d1069f22221bf0fbd5187ac32",
+    "upstream_commit": "34a138684a899b6ec34175f7a2b633860466d289",
+    "upstream_repository": "https://github.com/vectorize-io/hindsight",
+    "license": "MIT",
+    "retrieved_at": "2026-11-05T15:54:17.688278+08:00"
+  },
+  "vps_fastmcp_version": "4.1.6"
+}

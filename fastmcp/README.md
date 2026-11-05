@@ -4,6 +4,7 @@
 
 | 服务 | 内容与入口 |
 | --- | --- |
+| [Hindsight Project Memory](hindsight-memory/README.md) | 独立HTTPS MCP／受控API relay、会话重建和单层预算；主任务Herdr #13，客户端采用分别验收 |
 | [Gitee](gitee/README.md) | 原有脱敏参考资料与导入清单；线上配置不由占位模板覆盖 |
 | [Task Mailbox](https://github.com/CF-FE/task-mailbox-mcp) | 唯一维护仓为 `CF-FE/task-mailbox-mcp`；[本目录旧副本](task-mailbox/INTEGRATION.md)仅保留固定来源与部署历史，不承接后续功能或修复 |
 
