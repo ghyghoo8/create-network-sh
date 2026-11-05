@@ -1,0 +1,14 @@
+{
+  "public_base_url": "https://YOUR_EXISTING_HTTPS_ORIGIN/hindsight",
+  "upstream": {
+    "ssh_config": "/etc/hindsight-memory/ssh/config",
+    "ssh_host": "win-work",
+    "python": "D:\\Hindsight\\app\\.venv\\Scripts\\python.exe",
+    "mcp_script": "D:\\Hindsight\\scripts\\mcp-bridge.py",
+    "api_script": "D:\\Hindsight\\scripts\\api_relay.py"
+  },
+  "principals": {
+    "codex-cloud": {"banks": ["cf-fe-herdr-4-codexcloud"], "mutations": ["retain"]},
+    "github:YOUR_ALLOWED_LOGIN": {"banks": ["cf-fe-herdr-4-codexcloud"], "mutations": ["retain"]}
+  }
+}

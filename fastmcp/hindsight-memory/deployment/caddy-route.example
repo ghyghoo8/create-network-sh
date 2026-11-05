@@ -1,0 +1,3 @@
+# Insert before the existing catch-all. Keep Mailbox/Gitee/Headscale routes intact.
+@hindsight path /hindsight/* /.well-known/oauth-authorization-server/hindsight /.well-known/oauth-protected-resource/hindsight/mcp
+reverse_proxy @hindsight 127.0.0.1:8767

@@ -1,0 +1,36 @@
+[Unit]
+Description=Hindsight project-memory HTTPS bridge
+After=network-online.target herdr-easytier.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hindsight-memory
+Group=hindsight-memory
+WorkingDirectory=/opt/hindsight-memory/current
+EnvironmentFile=/etc/hindsight-memory/service.env
+Environment=FASTMCP_HOME=/var/lib/hindsight-memory/oauth
+Environment=FASTMCP_TELEMETRY_MODE=off
+Environment=PYTHONDONTWRITEBYTECODE=1
+LoadCredential=signing-key:/etc/hindsight-memory/signing.key
+LoadCredential=ssh-key:/var/lib/herdr-network/ssh/id_ed25519
+Environment=HINDSIGHT_VPS_SIGNING_KEY_FILE=/run/credentials/hindsight-memory.service/signing-key
+ExecStart=/opt/hindsight-memory/venv/bin/python -B /opt/hindsight-memory/current/server.py
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/hindsight-memory
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryHigh=192M
+MemoryMax=256M
+TasksMax=48
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
