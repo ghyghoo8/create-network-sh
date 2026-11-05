@@ -19,6 +19,8 @@
 
 `deployment/`包含独立用户、systemd credential、配置和路由模板。沿已有SSH配置复制连接参数及已核known_hosts；私钥由systemd `LoadCredential`读取既有受控文件，无需复制到仓库。服务签名key独立生成，OAuth状态只放本服务私有目录。`issue_token.py`为配置中已授权服务主体向私有文件签发30天JWT，不在stdout显示令牌，不覆盖旧令牌。生产凭据、实际配置和宿主回执不得提交。
 
+GitHub OAuth 分支校验 `read:user`，预配服务 JWT 分支校验 `memory:read`。MultiAuth 外层不强加共同 scope；每个分支仍验证自身身份，随后统一检查 principal、bank 和 mutation 授权，避免 OAuth 启用后阻断原 JWT。
+
 原云端Dot需要独立GitHub OAuth应用：homepage为本服务base URL，callback为`/hindsight/auth/callback`。在私有env填写新的client ID/secret，再按原客户端完成授权。未配置OAuth时，服务只支持预配JWT客户端，**不代表Dot已接入**。不复用信箱或Gitee的OAuth凭据。`FASTMCP_HOME`与其他服务分离。
 
 部署顺序为：本目录测试和复审 → 固定Git提交/依赖锁 → 独立venv、受控配置及systemd → 验证loopback认证 → Caddy validate、固定配置备份、受支持的配置reload → 公网身份/目录/自然调用 → 各客户端分别验收。回退时移除本次专属路由并reload、停本服务、恢复`current`到前一固定发布；保留原任务证据，其他服务与Win数据不动。

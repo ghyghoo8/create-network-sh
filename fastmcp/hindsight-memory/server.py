@@ -33,7 +33,8 @@ def build_app(config, secret):
         raise ValueError('A dedicated HTTPS public base URL is required')
     if len(secret) < 43:
         raise ValueError('Independent signing key must contain at least 32 random bytes')
-    verifier = JWTVerifier(public_key=secret, issuer=public, audience=public+'/mcp', algorithm='HS256')
+    verifier = JWTVerifier(public_key=secret, issuer=public, audience=public+'/mcp',
+                           algorithm='HS256', required_scopes=['memory:read'])
     oauth = None
     if os.environ.get('HINDSIGHT_GITHUB_CLIENT_ID'):
         oauth = GitHubProvider(
@@ -42,7 +43,10 @@ def build_app(config, secret):
             base_url=public, issuer_url=public, resource_base_url=public,
             redirect_path='/auth/callback', required_scopes=['read:user'],
             jwt_signing_key=secret, require_authorization_consent=True)
-    auth = MultiAuth(server=oauth, verifiers=[verifier], base_url=public, resource_base_url=public)
+    # The two trust sources use different scope vocabularies. Each verifier
+    # enforces its own minimum; bank and mutation grants remain below.
+    auth = MultiAuth(server=oauth, verifiers=[verifier], base_url=public,
+                     resource_base_url=public, required_scopes=[])
     catalog = json.loads((Path(__file__).parent/'catalog.json').read_text())
     gateway = Gateway(SSHTransport(config['upstream']), catalog)
     slots = asyncio.Semaphore(2)
