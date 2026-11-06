@@ -242,7 +242,8 @@ class Gateway:
                                         or 'bank_id' not in tool['inputSchema'].get('required', [])):
                 raise ValueError('Unscoped upstream tool')
 
-    async def invoke(self, tool, arguments, *, allowed_banks, protocol='mcp', timeout=180):
+    async def invoke(self, tool, arguments, *, allowed_banks, all_project_banks=False,
+                     protocol='mcp', timeout=180):
         from jsonschema import Draft202012Validator, ValidationError
         started = self.clock()
         if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not 0 < timeout <= 180:
@@ -256,9 +257,13 @@ class Gateway:
             Draft202012Validator(self.catalog[tool]['inputSchema']).validate(args)
         except ValidationError:
             raise ValueError('Arguments do not match the reviewed tool schema') from None
+        def authorized_bank(value):
+            return (isinstance(value, str) and bool(value) and value == value.strip()
+                    and value.casefold() != 'default'
+                    and (all_project_banks or value in allowed_banks))
+
         bank = args.get('bank_id')
-        if tool != 'list_banks' and (bank not in allowed_banks or bank != bank.strip()
-                                    or not bank or bank.casefold() == 'default'):
+        if tool != 'list_banks' and not authorized_bank(bank):
             raise PermissionError('Project bank is not authorized for this principal')
         if tool == 'retain':
             # Caller must possess the UUID even if the public HTTP ACK is lost.
@@ -359,7 +364,8 @@ class Gateway:
             if not isinstance(body, dict) or not isinstance(body.get('banks'), list):
                 result = result_body({'state': 'UNKNOWN', 'message': 'Invalid bank discovery response'}, True)
             else:
-                banks = [b for b in body['banks'] if b.get('bank_id', b.get('id')) in allowed_banks]
+                banks = [b for b in body['banks'] if isinstance(b, dict)
+                         and authorized_bank(b.get('bank_id', b.get('id')))]
                 result = result_body({**body, 'banks': banks, 'total': len(banks)})
         meta['elapsed_ms'] = round((self.clock()-started)*1000, 2)
         result.setdefault('_meta', {})['hindsight_gateway'] = meta

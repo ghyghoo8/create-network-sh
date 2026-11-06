@@ -87,6 +87,34 @@ class GatewayTests(unittest.IsolatedAsyncioTestCase):
                     await self.invoke(gateway, arguments={"bank_id": bank, "query": "q"})
                 self.assertEqual(transport.calls, [])
 
+    async def test_all_project_banks_allows_existing_and_future_bank_names(self):
+        for bank in ('existing-project', 'future-project'):
+            with self.subTest(bank=bank):
+                gateway, transport, _ = self.gateway([
+                    {'result': adapter.result_body({'bank_id': bank})}])
+                result = await self.invoke(gateway, arguments={'bank_id': bank, 'query': 'q'},
+                                           all_project_banks=True)
+                self.assertEqual(adapter.native_body(result)['bank_id'], bank)
+                self.assertEqual(transport.calls[0]['arguments']['bank_id'], bank)
+
+    async def test_all_project_banks_still_rejects_default_and_invalid_ids(self):
+        for bank in ('', ' ', 'default', 'DEFAULT', ' default', BANK+' ', None, 17):
+            with self.subTest(bank=bank):
+                gateway, transport, _ = self.gateway([])
+                with self.assertRaises((ValueError, PermissionError)):
+                    await self.invoke(gateway, arguments={'bank_id': bank, 'query': 'q'},
+                                      all_project_banks=True)
+                self.assertEqual(transport.calls, [])
+
+    async def test_false_or_wildcard_bank_entry_does_not_grant_all_projects(self):
+        for allowed in ({BANK}, {'*'}):
+            with self.subTest(allowed=allowed):
+                gateway, transport, _ = self.gateway([])
+                with self.assertRaises(PermissionError):
+                    await gateway.invoke('recall', {'bank_id': 'future-project', 'query': 'q'},
+                                         allowed_banks=allowed, all_project_banks=False)
+                self.assertEqual(transport.calls, [])
+
     async def test_business_rpc_and_auth_errors_do_not_switch_protocol_or_retry(self):
         responses = (
             adapter.result_body({"state": "RESPONSE", "http_status": 401, "body": {"error": "unauthorized"}}, True),
@@ -286,6 +314,18 @@ class GatewayTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(body["total"], 2)
             self.assertEqual(len(transport.calls), 1)
             self.assertNotIn("other-project", json.dumps(result))
+
+    async def test_all_project_bank_discovery_matches_call_authorization(self):
+        valid = [{'bank_id': BANK}, {'bank_id': 'future-project'}, {'id': 'legacy-project'}]
+        raw = {'banks': valid + [{'bank_id': bank} for bank in
+                                ('default', 'DEFAULT', '', ' ', 'project ', None, 17)]
+                        + [{}, 'invalid record'], 'total': 987}
+        for response in (adapter.result_body(raw), adapter.result_body({'state': 'RESPONSE', 'body': raw})):
+            gateway, _, _ = self.gateway([{'result': response}])
+            result = await self.invoke(gateway, 'list_banks', {}, all_project_banks=True)
+            body = adapter.native_body(result)
+            self.assertEqual(body['banks'], valid)
+            self.assertEqual(body['total'], len(valid))
 
 
 if __name__ == "__main__":

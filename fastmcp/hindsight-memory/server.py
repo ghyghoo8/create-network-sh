@@ -27,6 +27,9 @@ def tool_result(value):
 
 
 def build_app(config, secret):
+    for policy in config['principals'].values():
+        if not isinstance(policy.get('all_project_banks', False), bool):
+            raise ValueError('all_project_banks must be a JSON boolean')
     public = config['public_base_url'].rstrip('/')
     url = urlsplit(public)
     if url.scheme != 'https' or not url.netloc or url.query or url.fragment or url.username:
@@ -66,19 +69,20 @@ def build_app(config, secret):
         readonly = gateway.catalog[tool].get('annotations', {}).get('readOnlyHint') is True
         if not readonly and tool not in policy.get('mutations', []):
             raise PermissionError('Mutation is not authorized')
-        return policy['banks']
+        return policy
 
     async def invoke(token, tool, arguments, protocol='mcp', timeout=180):
         if tool not in gateway.catalog:
             raise ValueError('Unknown tool')
-        banks = grant(token, tool)
+        policy = grant(token, tool)
         # Queue wait is bounded separately; no permanent queue or retry loop.
         try:
             await asyncio.wait_for(slots.acquire(), .1)
         except TimeoutError:
             return {'content': [{'type': 'text', 'text': 'BUSY: no upstream action started'}], 'isError': True}
         try:
-            return await gateway.invoke(tool, arguments, allowed_banks=banks,
+            return await gateway.invoke(tool, arguments, allowed_banks=policy['banks'],
+                                        all_project_banks=policy.get('all_project_banks', False),
                                         protocol=protocol, timeout=timeout)
         finally:
             slots.release()

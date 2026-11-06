@@ -9,6 +9,6 @@
   },
   "principals": {
     "codex-cloud": {"banks": ["cf-fe-herdr-4-codexcloud"], "mutations": ["retain"]},
-    "github:YOUR_ALLOWED_LOGIN": {"banks": ["cf-fe-herdr-4-codexcloud"], "mutations": ["retain"]}
+    "github:YOUR_ALLOWED_LOGIN": {"banks": ["cf-fe-herdr-4-codexcloud"], "all_project_banks": false, "mutations": ["retain"]}
   }
 }

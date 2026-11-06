@@ -17,6 +17,10 @@
 
 只监听VPS loopback8767，经既有Caddy/ngrok独立分流。每个已验证主体按配置获得bank白名单和明确变更操作，默认只允许`retain`变更；bank不是授权。`list_banks`过滤掉其他bank。入口仅接受HTTPS授权，未知Origin拒绝，消息上限16MiB，最多两项在途调用。systemd限定256MiB内存，VPS不运行模型。
 
+对明确授权使用全部项目库的主体，可设置`"all_project_banks": true`，使现有及未来的有效、显式非`default` bank自动适用，无需逐库追加。该字段只能是JSON布尔值，缺省或`false`继续按`banks`精确匹配；保留原名单便于关闭开关后恢复。`"*"`不是通配符。此开关只改变bank范围，身份认证及`mutations`检查不变，不授予建库、删除或权限管理。仅配置`"mutations": ["retain"]`时，继续允许原有读取／检索及retain语义（含上游支持的同源文档更新），不等于严格只追加。
+
+调用入口和`list_banks`使用相同bank判定，始终排除空值、首尾空白及大小写不同的`default`。网关没有项目登记表，不核验组织归属；bank是否存在由上游判断。配置在服务启动时读取，修改后须重启原独立`hindsight-memory.service`。权限合同仍由server解析主体配置、Gateway校验bank，不改变上游数据归属、调用预算或mutation授权；回归测试覆盖两种范围及主体隔离。
+
 `deployment/`包含独立用户、systemd credential、配置和路由模板。沿已有SSH配置复制连接参数及已核known_hosts；私钥由systemd `LoadCredential`读取既有受控文件，无需复制到仓库。服务签名key独立生成，OAuth状态只放本服务私有目录。`issue_token.py`为配置中已授权服务主体向私有文件签发30天JWT，不在stdout显示令牌，不覆盖旧令牌。生产凭据、实际配置和宿主回执不得提交。
 
 GitHub OAuth 分支校验 `read:user`，预配服务 JWT 分支校验 `memory:read`。MultiAuth 外层不强加共同 scope；每个分支仍验证自身身份，随后统一检查 principal、bank 和 mutation 授权，避免 OAuth 启用后阻断原 JWT。
